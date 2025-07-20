@@ -1,351 +1,281 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import Navbar from "@/components/Navbar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Star, Users, Maximize, MapPin, Calendar, CreditCard, User, Mail, Phone } from "lucide-react"
-import type { Room } from "@/lib/types"
-import { mockRooms } from "@/lib/mockData"
+import { Star, Wifi, Car, Utensils, Waves, ArrowLeft } from "lucide-react"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Label } from "../components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+import { Badge } from "../components/ui/badge"
+import { mockRooms } from "../lib/mockData"
+import { formatPrice, calculateNights } from "../lib/utils"
+import type { BookingData } from "../lib/types"
 
-export default function BookingPage() {
-  const { roomId } = useParams()
+const BookingPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [room, setRoom] = useState<Room | null>(null)
-  const [loading, setLoading] = useState(true)
+  const room = mockRooms.find((r) => r.id === id)
 
-  const [bookingData, setBookingData] = useState({
-    customer_name: "",
-    customer_email: "",
-    customer_phone: "",
-    check_in: "",
-    check_out: "",
+  const [bookingData, setBookingData] = useState<BookingData>({
+    roomId: id || "",
+    checkIn: "",
+    checkOut: "",
     guests: 1,
-    special_requests: "",
+    totalPrice: 0,
+    guestInfo: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+    },
   })
-
-  useEffect(() => {
-    // Find room by ID
-    const foundRoom = mockRooms.find((r) => r.id === roomId)
-    setRoom(foundRoom || null)
-    setLoading(false)
-  }, [roomId])
-
-  const calculateNights = () => {
-    if (!bookingData.check_in || !bookingData.check_out) return 0
-    const checkIn = new Date(bookingData.check_in)
-    const checkOut = new Date(bookingData.check_out)
-    const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime())
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  }
-
-  const calculateTotal = () => {
-    if (!room) return 0
-    const nights = calculateNights()
-    return nights * room.price_per_night
-  }
-
-  const handleBooking = () => {
-    // In a real app, this would submit to an API
-    alert("Booking submitted successfully! You will receive a confirmation email shortly.")
-    navigate("/")
-  }
-
-  const getAmenityIcon = (amenity: string) => {
-    const amenityLower = amenity.toLowerCase()
-    if (amenityLower.includes("pool")) return "🏊"
-    if (amenityLower.includes("beach")) return "🏖️"
-    if (amenityLower.includes("wifi")) return "📶"
-    if (amenityLower.includes("ac") || amenityLower.includes("air")) return "❄️"
-    if (amenityLower.includes("balcony")) return "🌅"
-    if (amenityLower.includes("kitchen")) return "🍳"
-    if (amenityLower.includes("spa")) return "🧘"
-    return "✨"
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-slate-200 rounded w-1/3 mb-4" />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="h-96 bg-slate-200 rounded" />
-              <div className="h-96 bg-slate-200 rounded" />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   if (!room) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <Card className="text-center py-12">
-            <CardContent>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">Room Not Found</h2>
-              <p className="text-slate-600 mb-6">The room you're looking for doesn't exist.</p>
-              <Button onClick={() => navigate("/rooms")}>Browse All Rooms</Button>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <p className="text-center text-gray-500">Room not found</p>
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar />
+  const nights =
+    bookingData.checkIn && bookingData.checkOut ? calculateNights(bookingData.checkIn, bookingData.checkOut) : 0
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Button variant="outline" onClick={() => navigate("/rooms")} className="mb-4">
-            ← Back to Rooms
-          </Button>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Book Your Stay</h1>
-          <p className="text-slate-600">Complete your booking for {room.name}</p>
+  const subtotal = nights * room.price
+  const serviceFee = subtotal * 0.1
+  const taxes = subtotal * 0.08
+  const total = subtotal + serviceFee + taxes
+
+  const handleBooking = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Handle booking submission
+    alert("Booking submitted successfully!")
+    navigate("/")
+  }
+
+  const amenityIcons: { [key: string]: React.ReactNode } = {
+    WiFi: <Wifi className="w-4 h-4" />,
+    Parking: <Car className="w-4 h-4" />,
+    Restaurant: <Utensils className="w-4 h-4" />,
+    "Beach Access": <Waves className="w-4 h-4" />,
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6 text-gray-600 hover:text-gray-900">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
+      </Button>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Room Details */}
+        <div>
+          <div className="mb-6">
+            <img
+              src={room.images[0] || "/placeholder.svg"}
+              alt={room.name}
+              className="w-full h-80 object-cover rounded-xl"
+            />
+          </div>
+
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-2xl font-semibold text-gray-900">{room.name}</h1>
+              <div className="flex items-center space-x-1">
+                <Star className="w-4 h-4 fill-current text-gray-900" />
+                <span className="text-sm font-medium">{room.rating}</span>
+                <span className="text-sm text-gray-500">({room.reviews} reviews)</span>
+              </div>
+            </div>
+            <p className="text-gray-600 mb-4">{room.location}</p>
+            <p className="text-gray-700">{room.description}</p>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Room Details</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-gray-500">Guests:</span>
+                <span className="ml-2 font-medium">{room.maxGuests}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Bedrooms:</span>
+                <span className="ml-2 font-medium">{room.bedrooms}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Bathrooms:</span>
+                <span className="ml-2 font-medium">{room.bathrooms}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Size:</span>
+                <span className="ml-2 font-medium">{room.size} m²</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+            <div className="flex flex-wrap gap-2">
+              {room.amenities.map((amenity) => (
+                <Badge key={amenity} variant="outline" className="flex items-center space-x-1">
+                  {amenityIcons[amenity]}
+                  <span>{amenity}</span>
+                </Badge>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Room Details */}
-          <Card className="border-0 shadow-sm">
-            <div className="relative h-64 overflow-hidden rounded-t-lg">
-              <img
-                src={room.images[0] || "/placeholder.svg?height=300&width=600&text=Room+Image"}
-                alt={room.name}
-                className="w-full h-full object-cover"
-              />
-              {room.room_type && (
-                <Badge className="absolute top-3 left-3 bg-white/90 text-slate-800 border-0">{room.room_type}</Badge>
-              )}
-            </div>
-
-            <CardContent className="p-6">
-              {/* Villa and Location */}
-              {room.villa && (
-                <div className="flex items-center gap-1 text-sm text-slate-600 mb-2">
-                  <MapPin className="w-3 h-3 text-primary-500" />
-                  <span>
-                    {room.villa.name} • {room.villa.location}
-                  </span>
-                </div>
-              )}
-
-              {/* Room Name and Rating */}
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-2xl font-bold text-slate-900">{room.name}</h2>
-                <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 fill-accent-400 text-accent-400" />
-                  <span className="font-medium text-slate-700">{room.rating}</span>
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-slate-600 mb-4">{room.description}</p>
-
-              {/* Room Details */}
-              <div className="flex items-center gap-6 text-slate-600 mb-4">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-primary-500" />
-                  <span>{room.max_guests} guests</span>
-                </div>
-                {room.size_sqm && (
-                  <div className="flex items-center gap-2">
-                    <Maximize className="w-5 h-5 text-primary-500" />
-                    <span>{room.size_sqm}m²</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Amenities */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-slate-900 mb-3">Amenities</h3>
-                <div className="flex flex-wrap gap-2">
-                  {room.amenities.map((amenity, index) => (
-                    <Badge key={index} variant="secondary" className="bg-slate-100 text-slate-700 border-0">
-                      <span className="mr-1">{getAmenityIcon(amenity)}</span>
-                      {amenity}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price */}
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg text-slate-600">Price per night</span>
-                  <span className="text-2xl font-bold text-slate-900">${room.price_per_night}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Booking Form */}
-          <Card className="border-0 shadow-sm">
+        {/* Booking Form */}
+        <div>
+          <Card className="sticky top-8">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Booking Details
+              <CardTitle className="flex items-baseline space-x-2">
+                <span className="text-2xl font-semibold">{formatPrice(room.price)}</span>
+                <span className="text-gray-500 font-normal">night</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Guest Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-slate-900">Guest Information</h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    Full Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={bookingData.customer_name}
-                    onChange={(e) => setBookingData({ ...bookingData, customer_name: e.target.value })}
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    Email Address
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={bookingData.customer_email}
-                    onChange={(e) => setBookingData({ ...bookingData, customer_email: e.target.value })}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={bookingData.customer_phone}
-                    onChange={(e) => setBookingData({ ...bookingData, customer_phone: e.target.value })}
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-              </div>
-
-              {/* Stay Details */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-slate-900">Stay Details</h3>
-
+            <CardContent>
+              <form onSubmit={handleBooking} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="checkin" className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Check-in
-                    </Label>
+                  <div>
+                    <Label htmlFor="checkin">Check-in</Label>
                     <Input
                       id="checkin"
                       type="date"
-                      value={bookingData.check_in}
-                      onChange={(e) => setBookingData({ ...bookingData, check_in: e.target.value })}
+                      value={bookingData.checkIn}
+                      onChange={(e) => setBookingData({ ...bookingData, checkIn: e.target.value })}
                       min={new Date().toISOString().split("T")[0]}
                       required
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="checkout" className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Check-out
-                    </Label>
+                  <div>
+                    <Label htmlFor="checkout">Check-out</Label>
                     <Input
                       id="checkout"
                       type="date"
-                      value={bookingData.check_out}
-                      onChange={(e) => setBookingData({ ...bookingData, check_out: e.target.value })}
-                      min={bookingData.check_in || new Date().toISOString().split("T")[0]}
+                      value={bookingData.checkOut}
+                      onChange={(e) => setBookingData({ ...bookingData, checkOut: e.target.value })}
+                      min={bookingData.checkIn || new Date().toISOString().split("T")[0]}
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="guests" className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Number of Guests
-                  </Label>
-                  <Input
+                <div>
+                  <Label htmlFor="guests">Guests</Label>
+                  <select
                     id="guests"
-                    type="number"
-                    min="1"
-                    max={room.max_guests}
                     value={bookingData.guests}
-                    onChange={(e) => setBookingData({ ...bookingData, guests: Number.parseInt(e.target.value) })}
+                    onChange={(e) => setBookingData({ ...bookingData, guests: Number(e.target.value) })}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     required
-                  />
+                  >
+                    {Array.from({ length: room.maxGuests }, (_, i) => i + 1).map((num) => (
+                      <option key={num} value={num}>
+                        {num} {num === 1 ? "guest" : "guests"}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="requests">Special Requests (Optional)</Label>
-                  <textarea
-                    id="requests"
-                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={bookingData.special_requests}
-                    onChange={(e) => setBookingData({ ...bookingData, special_requests: e.target.value })}
-                    placeholder="Any special requests or requirements..."
-                  />
+                {nights > 0 && (
+                  <div className="border-t pt-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>
+                        {formatPrice(room.price)} × {nights} nights
+                      </span>
+                      <span>{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Service fee</span>
+                      <span>{formatPrice(serviceFee)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Taxes</span>
+                      <span>{formatPrice(taxes)}</span>
+                    </div>
+                    <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                      <span>Total</span>
+                      <span>{formatPrice(total)}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4 border-t pt-4">
+                  <h4 className="font-semibold">Guest Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={bookingData.guestInfo.firstName}
+                        onChange={(e) =>
+                          setBookingData({
+                            ...bookingData,
+                            guestInfo: { ...bookingData.guestInfo, firstName: e.target.value },
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={bookingData.guestInfo.lastName}
+                        onChange={(e) =>
+                          setBookingData({
+                            ...bookingData,
+                            guestInfo: { ...bookingData.guestInfo, lastName: e.target.value },
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={bookingData.guestInfo.email}
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          guestInfo: { ...bookingData.guestInfo, email: e.target.value },
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={bookingData.guestInfo.phone}
+                      onChange={(e) =>
+                        setBookingData({
+                          ...bookingData,
+                          guestInfo: { ...bookingData.guestInfo, phone: e.target.value },
+                        })
+                      }
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Booking Summary */}
-              <div className="border-t pt-4 space-y-3">
-                <h3 className="font-semibold text-slate-900">Booking Summary</h3>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Room rate per night</span>
-                    <span>${room.price_per_night}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Number of nights</span>
-                    <span>{calculateNights()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Number of guests</span>
-                    <span>{bookingData.guests}</span>
-                  </div>
-                  <div className="border-t pt-2 flex justify-between font-semibold text-lg">
-                    <span>Total</span>
-                    <span>${calculateTotal()}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Book Button */}
-              <Button
-                onClick={handleBooking}
-                className="w-full bg-accent-500 hover:bg-accent-600 text-white py-3 text-lg font-semibold"
-                disabled={
-                  !bookingData.customer_name ||
-                  !bookingData.customer_email ||
-                  !bookingData.check_in ||
-                  !bookingData.check_out
-                }
-              >
-                Book Now - ${calculateTotal()}
-              </Button>
+                <Button
+                  type="submit"
+                  className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 text-lg font-semibold"
+                  disabled={!bookingData.checkIn || !bookingData.checkOut}
+                >
+                  Reserve
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
@@ -353,3 +283,5 @@ export default function BookingPage() {
     </div>
   )
 }
+
+export default BookingPage
