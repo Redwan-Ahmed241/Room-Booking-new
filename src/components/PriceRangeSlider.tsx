@@ -1,119 +1,75 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { DollarSign } from "lucide-react"
+import type React from "react"
 
 interface PriceRangeSliderProps {
-  min?: number
-  max?: number
+  min: number
+  max: number
   value: [number, number]
   onChange: (value: [number, number]) => void
+  step?: number
   className?: string
 }
 
-export default function PriceRangeSlider({
-  min = 0,
-  max = 1000,
-  value,
-  onChange,
-  className = "",
-}: PriceRangeSliderProps) {
-  const [localValue, setLocalValue] = useState(value)
-
-  useEffect(() => {
-    setLocalValue(value)
-  }, [value])
-
-  const handleMinChange = (newMin: number) => {
-    const clampedMin = Math.max(min, Math.min(newMin, localValue[1] - 1))
-    const newValue: [number, number] = [clampedMin, localValue[1]]
-    setLocalValue(newValue)
-    onChange(newValue)
+const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({ min, max, value, onChange, step = 1, className = "" }) => {
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMin = Math.min(Number(e.target.value), value[1] - step)
+    onChange([newMin, value[1]])
   }
 
-  const handleMaxChange = (newMax: number) => {
-    const clampedMax = Math.min(max, Math.max(newMax, localValue[0] + 1))
-    const newValue: [number, number] = [localValue[0], clampedMax]
-    setLocalValue(newValue)
-    onChange(newValue)
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMax = Math.max(Number(e.target.value), value[0] + step)
+    onChange([value[0], newMax])
   }
 
-  const percentage = (val: number) => ((val - min) / (max - min)) * 100
+  const minPercent = ((value[0] - min) / (max - min)) * 100
+  const maxPercent = ((value[1] - min) / (max - min)) * 100
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      <Label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-        <DollarSign className="w-4 h-4 text-primary-600" />
-        Price Range (per night)
-      </Label>
+    <div className={`relative ${className}`}>
+      <div className="flex justify-between text-sm text-gray-600 mb-2">
+        <span>${value[0]}</span>
+        <span>${value[1]}</span>
+      </div>
 
-      {/* Visual Slider */}
-      <div className="relative h-2 bg-slate-200 rounded-full">
-        {/* Track highlight */}
+      <div className="relative h-2 bg-gray-200 rounded-full">
         <div
-          className="absolute h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full shadow-sm"
+          className="absolute h-2 bg-pink-500 rounded-full"
           style={{
-            left: `${percentage(localValue[0])}%`,
-            width: `${percentage(localValue[1]) - percentage(localValue[0])}%`,
+            left: `${minPercent}%`,
+            width: `${maxPercent - minPercent}%`,
           }}
         />
 
-        {/* Min handle */}
-        <div
-          className="absolute w-5 h-5 bg-white border-2 border-primary-500 rounded-full cursor-pointer transform -translate-x-1/2 -translate-y-1.5 hover:scale-110 transition-transform shadow-md hover:border-primary-600"
-          style={{ left: `${percentage(localValue[0])}%` }}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={value[0]}
+          step={step}
+          onChange={handleMinChange}
+          className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
+          style={{ zIndex: 1 }}
         />
 
-        {/* Max handle */}
-        <div
-          className="absolute w-5 h-5 bg-white border-2 border-primary-500 rounded-full cursor-pointer transform -translate-x-1/2 -translate-y-1.5 hover:scale-110 transition-transform shadow-md hover:border-primary-600"
-          style={{ left: `${percentage(localValue[1])}%` }}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={value[1]}
+          step={step}
+          onChange={handleMaxChange}
+          className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
+          style={{ zIndex: 2 }}
         />
       </div>
 
-      {/* Input fields */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <Label className="text-xs text-slate-600">Minimum</Label>
-          <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              type="number"
-              min={min}
-              max={localValue[1] - 1}
-              value={localValue[0]}
-              onChange={(e) => handleMinChange(Number.parseInt(e.target.value) || min)}
-              className="pl-10 h-10 border-slate-300 focus:border-primary-500 focus:ring-primary-500"
-              placeholder="Min price"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <Label className="text-xs text-slate-600">Maximum</Label>
-          <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              type="number"
-              min={localValue[0] + 1}
-              max={max}
-              value={localValue[1]}
-              onChange={(e) => handleMaxChange(Number.parseInt(e.target.value) || max)}
-              className="pl-10 h-10 border-slate-300 focus:border-primary-500 focus:ring-primary-500"
-              placeholder="Max price"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Price display */}
-      <div className="flex justify-between text-sm text-slate-600 bg-slate-50 px-3 py-2 rounded-lg">
-        <span className="font-medium">${localValue[0]}</span>
-        <span className="text-slate-400">to</span>
-        <span className="font-medium">${localValue[1]}</span>
+      <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <span>${min}</span>
+        <span>${max}+</span>
       </div>
     </div>
   )
 }
+
+export default PriceRangeSlider
