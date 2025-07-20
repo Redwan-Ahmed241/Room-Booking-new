@@ -20,6 +20,7 @@ export const mockRooms: Room[] = [
     bedrooms: 2,
     bathrooms: 2,
     size: 85,
+    available: true,
   },
   {
     id: "2",
@@ -39,6 +40,7 @@ export const mockRooms: Room[] = [
     bedrooms: 1,
     bathrooms: 1,
     size: 45,
+    available: true,
   },
   {
     id: "3",
@@ -58,6 +60,7 @@ export const mockRooms: Room[] = [
     bedrooms: 2,
     bathrooms: 2,
     size: 95,
+    available: true,
   },
   {
     id: "4",
@@ -77,6 +80,7 @@ export const mockRooms: Room[] = [
     bedrooms: 3,
     bathrooms: 3,
     size: 150,
+    available: true,
   },
   {
     id: "5",
@@ -93,6 +97,7 @@ export const mockRooms: Room[] = [
     bedrooms: 1,
     bathrooms: 1,
     size: 35,
+    available: true,
   },
   {
     id: "6",
@@ -112,5 +117,21 @@ export const mockRooms: Room[] = [
     bedrooms: 4,
     bathrooms: 3,
     size: 200,
+    available: true,
   },
+]
+
+export const popularAmenities = [
+  "WiFi",
+  "Pool",
+  "Spa",
+  "Gym",
+  "Restaurant",
+  "Bar",
+  "Beach Access",
+  "Parking",
+  "Pet Friendly",
+  "Room Service",
+  "Concierge",
+  "Business Center",
 ]

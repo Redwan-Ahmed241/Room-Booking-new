@@ -13,6 +13,7 @@ export interface Room {
   bedrooms: number
   bathrooms: number
   size: number
+  available?: boolean
 }
 
 export interface SearchFilters {
@@ -37,4 +38,11 @@ export interface BookingData {
     email: string
     phone: string
   }
+}
+
+export interface AdminUser {
+  id: string
+  email: string
+  name: string
+  role: "admin"
 }

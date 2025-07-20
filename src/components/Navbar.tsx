@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { Menu, X, User, Globe, BombIcon as Balloon, UtensilsCrossed, Home } from "lucide-react"
+import { Menu, X, User, Globe, BombIcon as Balloon, UtensilsCrossed, Home, Settings } from "lucide-react"
 import Logo from "./Logo"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
@@ -39,12 +39,13 @@ const Navbar: React.FC = () => {
               <div className="w-px h-6 bg-gray-300" />
 
               <Link
-                to="/experiences"
-                className="flex items-center px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-full transition-colors relative"
+                to="/rooms"
+                className={`flex items-center px-6 py-3 text-sm font-medium rounded-full transition-colors ${
+                  isActive("/rooms") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
+                }`}
               >
                 <Balloon className="w-4 h-4 mr-2" />
-                Experiences
-                <Badge className="ml-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">NEW</Badge>
+                Rooms
               </Link>
 
               <div className="w-px h-6 bg-gray-300" />
@@ -62,9 +63,12 @@ const Navbar: React.FC = () => {
 
           {/* Right Side - User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Become a host
-            </Button>
+            <Link to="/admin">
+              <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <Settings className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
+            </Link>
 
             <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-50">
               <Globe className="w-4 h-4" />
@@ -102,30 +106,29 @@ const Navbar: React.FC = () => {
               </Link>
 
               <Link
-                to="/experiences"
-                className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                to="/rooms"
+                className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                  isActive("/rooms") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 <Balloon className="w-5 h-5 mr-3" />
-                Experiences
-                <Badge className="ml-2 bg-pink-500 text-white text-xs">NEW</Badge>
+                Rooms
               </Link>
 
               <Link
-                to="/services"
-                className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                to="/admin"
+                className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                  isActive("/admin") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                <UtensilsCrossed className="w-5 h-5 mr-3" />
-                Services
-                <Badge className="ml-2 bg-pink-500 text-white text-xs">NEW</Badge>
+                <Settings className="w-5 h-5 mr-3" />
+                Admin
               </Link>
 
               <div className="pt-4 border-t border-gray-200 mt-4">
                 <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-50">
-                  Become a host
-                </Button>
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-50 mt-2">
                   <User className="w-4 h-4 mr-2" />
                   Sign up
                 </Button>
