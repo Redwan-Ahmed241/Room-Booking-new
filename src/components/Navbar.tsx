@@ -116,7 +116,7 @@ const Navbar: React.FC = () => {
                 Rooms
               </Link>
 
-              <Link
+              {/* <Link
                 to="/admin"
                 className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
                   isActive("/admin") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
@@ -125,7 +125,7 @@ const Navbar: React.FC = () => {
               >
                 <Settings className="w-5 h-5 mr-3" />
                 Admin
-              </Link>
+              </Link> */}
 
               <div className="pt-4 border-t border-gray-200 mt-4">
                 <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-50">
