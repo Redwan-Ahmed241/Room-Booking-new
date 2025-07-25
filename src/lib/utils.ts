@@ -13,9 +13,10 @@ export function formatPrice(price: number): string {
   }).format(price)
 }
 
-export function calculateNights(checkIn: string, checkOut: string): number {
-  const start = new Date(checkIn)
-  const end = new Date(checkOut)
-  const diffTime = Math.abs(end.getTime() - start.getTime())
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+export function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
 }

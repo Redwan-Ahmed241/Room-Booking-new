@@ -1,72 +1,82 @@
 "use client"
 
 import type React from "react"
+import { useState } from "react"
+import { formatPrice } from "../lib/utils"
 
 interface PriceRangeSliderProps {
-  min: number
-  max: number
   value: [number, number]
   onChange: (value: [number, number]) => void
-  step?: number
-  className?: string
+  min: number
+  max: number
 }
 
-const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({ min, max, value, onChange, step = 1, className = "" }) => {
+const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({ value, onChange, min, max }) => {
+  const [localValue, setLocalValue] = useState(value)
+
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMin = Math.min(Number(e.target.value), value[1] - step)
-    onChange([newMin, value[1]])
+    const newMin = Number(e.target.value)
+    const newValue: [number, number] = [newMin, Math.max(newMin, localValue[1])]
+    setLocalValue(newValue)
+    onChange(newValue)
   }
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMax = Math.max(Number(e.target.value), value[0] + step)
-    onChange([value[0], newMax])
+    const newMax = Number(e.target.value)
+    const newValue: [number, number] = [Math.min(localValue[0], newMax), newMax]
+    setLocalValue(newValue)
+    onChange(newValue)
   }
 
-  const minPercent = ((value[0] - min) / (max - min)) * 100
-  const maxPercent = ((value[1] - min) / (max - min)) * 100
-
   return (
-    <div className={`relative ${className}`}>
-      <div className="flex justify-between text-sm text-gray-600 mb-2">
-        <span>${value[0]}</span>
-        <span>${value[1]}</span>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between text-sm">
+        <span>{formatPrice(localValue[0])}</span>
+        <span>{formatPrice(localValue[1])}</span>
       </div>
 
-      <div className="relative h-2 bg-gray-200 rounded-full">
-        <div
-          className="absolute h-2 bg-pink-500 rounded-full"
-          style={{
-            left: `${minPercent}%`,
-            width: `${maxPercent - minPercent}%`,
-          }}
-        />
-
+      <div className="relative">
         <input
           type="range"
           min={min}
           max={max}
-          value={value[0]}
-          step={step}
+          value={localValue[0]}
           onChange={handleMinChange}
-          className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
-          style={{ zIndex: 1 }}
+          className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
         />
-
         <input
           type="range"
           min={min}
           max={max}
-          value={value[1]}
-          step={step}
+          value={localValue[1]}
           onChange={handleMaxChange}
-          className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
-          style={{ zIndex: 2 }}
+          className="absolute w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb"
         />
       </div>
 
-      <div className="flex justify-between text-xs text-gray-500 mt-1">
-        <span>${min}</span>
-        <span>${max}+</span>
+      <div className="flex items-center space-x-4 text-sm">
+        <div className="flex-1">
+          <label className="block text-xs text-gray-500 mb-1">Min price</label>
+          <input
+            type="number"
+            value={localValue[0]}
+            onChange={(e) => handleMinChange(e)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            min={min}
+            max={max}
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block text-xs text-gray-500 mb-1">Max price</label>
+          <input
+            type="number"
+            value={localValue[1]}
+            onChange={(e) => handleMaxChange(e)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            min={min}
+            max={max}
+          />
+        </div>
       </div>
     </div>
   )

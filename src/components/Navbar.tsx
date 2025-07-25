@@ -3,12 +3,17 @@
 import type React from "react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { Menu, X, User, Globe, BombIcon as Balloon, UtensilsCrossed, Home, Settings } from "lucide-react"
+import { Menu, X, User, Globe, BombIcon as Balloon, UtensilsCrossed, Home, LogOut } from "lucide-react"
 import Logo from "./Logo"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  isAdmin?: boolean
+  onLogout?: () => void
+}
+
+const Navbar: React.FC<NavbarProps> = ({ isAdmin = false, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
 
@@ -63,12 +68,23 @@ const Navbar: React.FC = () => {
 
           {/* Right Side - User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/admin">
+            {isAdmin ? (
+              <>
+                <Link to="/admin">
+                  <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Admin Dashboard
+                  </Button>
+                </Link>
+                <Button variant="ghost" onClick={onLogout} className="text-sm font-medium text-red-600 hover:bg-red-50">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </>
+            ) : (
               <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:bg-gray-50">
-                <Settings className="w-4 h-4 mr-2" />
-                Admin
+                Become a host
               </Button>
-            </Link>
+            )}
 
             <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-50">
               <Globe className="w-4 h-4" />
@@ -116,16 +132,30 @@ const Navbar: React.FC = () => {
                 Rooms
               </Link>
 
-              {/* <Link
-                to="/admin"
-                className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
-                  isActive("/admin") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Settings className="w-5 h-5 mr-3" />
-                Admin
-              </Link> */}
+              {isAdmin && (
+                <>
+                  <Link
+                    to="/admin"
+                    className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                      isActive("/admin") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      onLogout?.()
+                      setIsMenuOpen(false)
+                    }}
+                    className="w-full justify-start text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </>
+              )}
 
               <div className="pt-4 border-t border-gray-200 mt-4">
                 <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-50">

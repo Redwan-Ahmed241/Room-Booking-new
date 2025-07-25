@@ -2,114 +2,113 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Search } from "lucide-react"
+import { Search, MapPin, Calendar, Users } from "lucide-react"
 import { Button } from "./ui/button"
+import { Input } from "./ui/input"
 import type { SearchFilters } from "../lib/types"
 
-const HeroSearch: React.FC = () => {
-  const navigate = useNavigate()
-  const [filters, setFilters] = useState<SearchFilters>({
+interface HeroSearchProps {
+  onSearch: (filters: SearchFilters) => void
+}
+
+const HeroSearch: React.FC<HeroSearchProps> = ({ onSearch }) => {
+  const [searchData, setSearchData] = useState({
     location: "",
     checkIn: "",
     checkOut: "",
     guests: 1,
-    priceRange: [100, 1000],
-    amenities: [],
-    roomType: "Any type",
   })
 
-  const handleSearch = () => {
-    const searchParams = new URLSearchParams()
-    if (filters.location) searchParams.set("location", filters.location)
-    if (filters.checkIn) searchParams.set("checkIn", filters.checkIn)
-    if (filters.checkOut) searchParams.set("checkOut", filters.checkOut)
-    if (filters.guests > 1) searchParams.set("guests", filters.guests.toString())
-    if (filters.priceRange[0] !== 100 || filters.priceRange[1] !== 1000) {
-      searchParams.set("minPrice", filters.priceRange[0].toString())
-      searchParams.set("maxPrice", filters.priceRange[1].toString())
-    }
-    navigate(`/rooms?${searchParams.toString()}`)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSearch({
+      ...searchData,
+      priceRange: [0, 1000],
+      roomType: "",
+      amenities: [],
+    })
   }
 
-  const today = new Date().toISOString().split("T")[0]
-
   return (
-    <div className="bg-white rounded-full shadow-lg border border-gray-300 p-2 max-w-4xl mx-auto">
-      <div className="flex items-center">
-        {/* Where */}
-        <div className="search-section flex-1">
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-900 mb-1">Where</label>
-            <input
-              type="text"
-              placeholder="Search destinations"
-              value={filters.location}
-              onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-              className="search-input text-sm text-gray-600"
-            />
+    <div className="bg-white rounded-full shadow-lg border border-gray-200 p-2">
+      <form onSubmit={handleSubmit} className="flex flex-col md:flex-row items-center">
+        {/* Location */}
+        <div className="flex-1 px-6 py-4 border-r border-gray-200">
+          <div className="flex items-center space-x-3">
+            <MapPin className="w-5 h-5 text-gray-400" />
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-900 mb-1">Where</label>
+              <Input
+                type="text"
+                placeholder="Search destinations"
+                value={searchData.location}
+                onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
+                className="border-0 p-0 text-sm placeholder-gray-500 focus:ring-0"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Check in */}
-        <div className="search-section">
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-900 mb-1">Check in</label>
-            <input
-              type="date"
-              value={filters.checkIn}
-              onChange={(e) => setFilters({ ...filters, checkIn: e.target.value })}
-              min={today}
-              className="search-input text-sm text-gray-600"
-              placeholder="Add dates"
-            />
+        {/* Check-in */}
+        <div className="flex-1 px-6 py-4 border-r border-gray-200">
+          <div className="flex items-center space-x-3">
+            <Calendar className="w-5 h-5 text-gray-400" />
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-900 mb-1">Check in</label>
+              <Input
+                type="date"
+                value={searchData.checkIn}
+                onChange={(e) => setSearchData({ ...searchData, checkIn: e.target.value })}
+                className="border-0 p-0 text-sm focus:ring-0"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Check out */}
-        <div className="search-section">
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-900 mb-1">Check out</label>
-            <input
-              type="date"
-              value={filters.checkOut}
-              onChange={(e) => setFilters({ ...filters, checkOut: e.target.value })}
-              min={filters.checkIn || today}
-              className="search-input text-sm text-gray-600"
-              placeholder="Add dates"
-            />
+        {/* Check-out */}
+        <div className="flex-1 px-6 py-4 border-r border-gray-200">
+          <div className="flex items-center space-x-3">
+            <Calendar className="w-5 h-5 text-gray-400" />
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-900 mb-1">Check out</label>
+              <Input
+                type="date"
+                value={searchData.checkOut}
+                onChange={(e) => setSearchData({ ...searchData, checkOut: e.target.value })}
+                className="border-0 p-0 text-sm focus:ring-0"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Who */}
-        <div className="search-section">
-          <div className="flex flex-col">
-            <label className="text-xs font-semibold text-gray-900 mb-1">Who</label>
-            <select
-              value={filters.guests}
-              onChange={(e) => setFilters({ ...filters, guests: Number(e.target.value) })}
-              className="search-input text-sm text-gray-600 bg-transparent"
-            >
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                <option key={num} value={num}>
-                  {num === 1 ? "Add guests" : `${num} guests`}
-                </option>
-              ))}
-            </select>
+        {/* Guests */}
+        <div className="flex-1 px-6 py-4">
+          <div className="flex items-center space-x-3">
+            <Users className="w-5 h-5 text-gray-400" />
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-900 mb-1">Who</label>
+              <select
+                value={searchData.guests}
+                onChange={(e) => setSearchData({ ...searchData, guests: Number(e.target.value) })}
+                className="border-0 p-0 text-sm bg-transparent focus:ring-0 w-full"
+              >
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <option key={num} value={num}>
+                    {num} guest{num > 1 ? "s" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
         {/* Search Button */}
-        <div className="pl-4">
-          <Button
-            onClick={handleSearch}
-            className="bg-pink-500 hover:bg-pink-600 text-white rounded-full w-12 h-12 p-0 shadow-md"
-            size="icon"
-          >
-            <Search className="w-4 h-4" />
+        <div className="px-2">
+          <Button type="submit" size="icon" className="bg-pink-500 hover:bg-pink-600 text-white rounded-full h-12 w-12">
+            <Search className="w-5 h-5" />
           </Button>
         </div>
-      </div>
+      </form>
     </div>
   )
 }

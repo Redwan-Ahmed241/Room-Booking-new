@@ -13,7 +13,7 @@ export interface Room {
   bedrooms: number
   bathrooms: number
   size: number
-  available?: boolean
+  available: boolean
 }
 
 export interface SearchFilters {
@@ -22,8 +22,8 @@ export interface SearchFilters {
   checkOut: string
   guests: number
   priceRange: [number, number]
-  amenities: string[]
   roomType: string
+  amenities: string[]
 }
 
 export interface BookingData {
@@ -33,16 +33,8 @@ export interface BookingData {
   guests: number
   totalPrice: number
   guestInfo: {
-    firstName: string
-    lastName: string
+    name: string
     email: string
     phone: string
   }
-}
-
-export interface AdminUser {
-  id: string
-  email: string
-  name: string
-  role: "admin"
 }

@@ -1,95 +1,110 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useState } from "react"
 import RoomCard from "../components/RoomCard"
 import FilterChips from "../components/FilterChips"
+import PriceRangeSlider from "../components/PriceRangeSlider"
 import { mockRooms } from "../lib/mockData"
 import type { Room, SearchFilters } from "../lib/types"
+import { Button } from "../components/ui/button"
+import { Card, CardContent } from "../components/ui/card"
+import { Filter } from "lucide-react"
 
 const RoomsPage: React.FC = () => {
-  const [searchParams] = useSearchParams()
   const [filteredRooms, setFilteredRooms] = useState<Room[]>(mockRooms)
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState<SearchFilters>({
+    location: "",
+    checkIn: "",
+    checkOut: "",
+    guests: 1,
+    priceRange: [0, 1000],
+    roomType: "",
+    amenities: [],
+  })
 
-  const filters: SearchFilters = {
-    location: searchParams.get("location") || "",
-    checkIn: searchParams.get("checkIn") || "",
-    checkOut: searchParams.get("checkOut") || "",
-    guests: Number(searchParams.get("guests")) || 1,
-    priceRange: [Number(searchParams.get("minPrice")) || 100, Number(searchParams.get("maxPrice")) || 1000],
-    amenities: selectedFilters,
-    roomType: searchParams.get("roomType") || "Any type",
-  }
+  const handleFilterChange = (newFilters: Partial<SearchFilters>) => {
+    const updatedFilters = { ...filters, ...newFilters }
+    setFilters(updatedFilters)
 
-  useEffect(() => {
-    let filtered = mockRooms
+    const filtered = mockRooms.filter((room) => {
+      const matchesLocation =
+        !updatedFilters.location || room.location.toLowerCase().includes(updatedFilters.location.toLowerCase())
 
-    // Filter by location
-    if (filters.location) {
-      filtered = filtered.filter(
-        (room) =>
-          room.location.toLowerCase().includes(filters.location.toLowerCase()) ||
-          room.name.toLowerCase().includes(filters.location.toLowerCase()),
-      )
-    }
+      const matchesGuests = room.maxGuests >= updatedFilters.guests
 
-    // Filter by guests
-    if (filters.guests > 1) {
-      filtered = filtered.filter((room) => room.maxGuests >= filters.guests)
-    }
+      const matchesPrice = room.price >= updatedFilters.priceRange[0] && room.price <= updatedFilters.priceRange[1]
 
-    // Filter by price range
-    filtered = filtered.filter((room) => room.price >= filters.priceRange[0] && room.price <= filters.priceRange[1])
+      const matchesType = !updatedFilters.roomType || room.type === updatedFilters.roomType
 
-    // Filter by room type
-    if (filters.roomType !== "Any type") {
-      filtered = filtered.filter((room) => room.type === filters.roomType.toLowerCase())
-    }
+      const matchesAmenities =
+        updatedFilters.amenities.length === 0 ||
+        updatedFilters.amenities.every((amenity) => room.amenities.includes(amenity))
 
-    // Filter by amenities
-    if (selectedFilters.length > 0) {
-      filtered = filtered.filter((room) =>
-        selectedFilters.every((filter) =>
-          room.amenities.some((amenity) => amenity.toLowerCase().includes(filter.toLowerCase())),
-        ),
-      )
-    }
+      return matchesLocation && matchesGuests && matchesPrice && matchesType && matchesAmenities
+    })
 
     setFilteredRooms(filtered)
-  }, [filters.location, filters.guests, filters.priceRange, filters.roomType, selectedFilters])
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-          {filteredRooms.length} stays {filters.location && `in ${filters.location}`}
-        </h1>
-        <p className="text-gray-600">
-          {filters.checkIn && filters.checkOut && (
-            <>
-              {new Date(filters.checkIn).toLocaleDateString()} - {new Date(filters.checkOut).toLocaleDateString()} •
-            </>
-          )}
-          {filters.guests > 1 && ` ${filters.guests} guests`}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">All Rooms</h1>
+            <p className="text-gray-600 mt-1">{filteredRooms.length} rooms available</p>
+          </div>
 
-      <FilterChips selectedFilters={selectedFilters} onFilterChange={setSelectedFilters} />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredRooms.map((room) => (
-          <RoomCard key={room.id} room={room} />
-        ))}
-      </div>
-
-      {filteredRooms.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
-          <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
+          <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="md:hidden">
+            <Filter className="w-4 h-4 mr-2" />
+            Filters
+          </Button>
         </div>
-      )}
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div className={`lg:w-80 ${showFilters ? "block" : "hidden lg:block"}`}>
+            <Card className="sticky top-24">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Filters</h3>
+
+                {/* Price Range */}
+                <div className="mb-6">
+                  <h4 className="font-medium mb-3">Price Range</h4>
+                  <PriceRangeSlider
+                    value={filters.priceRange}
+                    onChange={(range) => handleFilterChange({ priceRange: range })}
+                    min={0}
+                    max={1000}
+                  />
+                </div>
+
+                {/* Filter Chips */}
+                <FilterChips filters={filters} onFilterChange={handleFilterChange} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Rooms Grid */}
+          <div className="flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredRooms.map((room) => (
+                <RoomCard key={room.id} room={room} />
+              ))}
+            </div>
+
+            {filteredRooms.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
+                <p className="text-gray-400 mt-2">Try adjusting your filters.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
