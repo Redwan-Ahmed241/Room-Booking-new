@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return isAuthenticated ? <>{children}</> : <Navigate to="/admin/login" />
 }
 
-// App Routes Component
+// App Routes Component (this needs to be inside AuthProvider)
 const AppRoutes: React.FC = () => {
   return (
     <Router>

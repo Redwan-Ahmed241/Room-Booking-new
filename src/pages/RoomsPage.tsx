@@ -2,18 +2,12 @@
 
 import type React from "react"
 import { useState } from "react"
+import { useRooms } from "../hooks/useRooms"
 import RoomCard from "../components/RoomCard"
 import FilterChips from "../components/FilterChips"
-import PriceRangeSlider from "../components/PriceRangeSlider"
-import { mockRooms } from "../lib/mockData"
-import type { Room, SearchFilters } from "../lib/types"
-import { Button } from "../components/ui/button"
-import { Card, CardContent } from "../components/ui/card"
-import { Filter } from "lucide-react"
+import type { SearchFilters } from "../lib/types"
 
 const RoomsPage: React.FC = () => {
-  const [filteredRooms, setFilteredRooms] = useState<Room[]>(mockRooms)
-  const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState<SearchFilters>({
     location: "",
     checkIn: "",
@@ -24,86 +18,83 @@ const RoomsPage: React.FC = () => {
     amenities: [],
   })
 
+  const { rooms, loading, error } = useRooms({
+    location: filters.location,
+    checkIn: filters.checkIn,
+    checkOut: filters.checkOut,
+    guests: filters.guests,
+    minPrice: filters.priceRange[0],
+    maxPrice: filters.priceRange[1],
+    roomType: filters.roomType,
+    amenities: filters.amenities,
+  })
+
   const handleFilterChange = (newFilters: Partial<SearchFilters>) => {
-    const updatedFilters = { ...filters, ...newFilters }
-    setFilters(updatedFilters)
+    setFilters((prev) => ({ ...prev, ...newFilters }))
+  }
 
-    const filtered = mockRooms.filter((room) => {
-      const matchesLocation =
-        !updatedFilters.location || room.location.toLowerCase().includes(updatedFilters.location.toLowerCase())
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading rooms...</p>
+        </div>
+      </div>
+    )
+  }
 
-      const matchesGuests = room.maxGuests >= updatedFilters.guests
-
-      const matchesPrice = room.price >= updatedFilters.priceRange[0] && room.price <= updatedFilters.priceRange[1]
-
-      const matchesType = !updatedFilters.roomType || room.type === updatedFilters.roomType
-
-      const matchesAmenities =
-        updatedFilters.amenities.length === 0 ||
-        updatedFilters.amenities.every((amenity) => room.amenities.includes(amenity))
-
-      return matchesLocation && matchesGuests && matchesPrice && matchesType && matchesAmenities
-    })
-
-    setFilteredRooms(filtered)
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error: {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">All Rooms</h1>
+          <p className="text-gray-600">Discover our collection of beautiful accommodations</p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <FilterChips filters={filters} onFilterChange={handleFilterChange} />
+        </div>
+      </div>
+
+      {/* Results */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">All Rooms</h1>
-            <p className="text-gray-600 mt-1">{filteredRooms.length} rooms available</p>
-          </div>
-
-          <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="md:hidden">
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
-          </Button>
+          <h2 className="text-2xl font-semibold text-gray-900">{rooms.length} rooms available</h2>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <div className={`lg:w-80 ${showFilters ? "block" : "hidden lg:block"}`}>
-            <Card className="sticky top-24">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Filters</h3>
-
-                {/* Price Range */}
-                <div className="mb-6">
-                  <h4 className="font-medium mb-3">Price Range</h4>
-                  <PriceRangeSlider
-                    value={filters.priceRange}
-                    onChange={(range) => handleFilterChange({ priceRange: range })}
-                    min={0}
-                    max={1000}
-                  />
-                </div>
-
-                {/* Filter Chips */}
-                <FilterChips filters={filters} onFilterChange={handleFilterChange} />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Rooms Grid */}
-          <div className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredRooms.map((room) => (
-                <RoomCard key={room.id} room={room} />
-              ))}
-            </div>
-
-            {filteredRooms.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
-                <p className="text-gray-400 mt-2">Try adjusting your filters.</p>
-              </div>
-            )}
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {rooms.map((room) => (
+            <RoomCard key={room.id} room={room} />
+          ))}
         </div>
+
+        {rooms.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
+            <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
+          </div>
+        )}
       </div>
     </div>
   )
