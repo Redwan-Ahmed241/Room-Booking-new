@@ -1,35 +1,62 @@
 "use client"
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { useState } from "react"
+import type React from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import Navbar from "./components/Navbar"
 import HomePage from "./pages/HomePage"
 import RoomsPage from "./pages/RoomsPage"
 import BookingPage from "./pages/BookingPage"
-import AdminPage from "./pages/AdminPage"
 import AdminLogin from "./pages/AdminLogin"
+import AdminPage from "./pages/AdminPage"
+import AuthProvider from "./components/AuthProvider"
+import { useAuth } from "./hooks/useAuth"
 
-function App() {
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth()
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+      </div>
+    )
+  }
+
+  return isAuthenticated ? <>{children}</> : <Navigate to="/admin/login" />
+}
+
+// App Routes Component
+const AppRoutes: React.FC = () => {
   return (
     <Router>
       <div className="min-h-screen bg-white">
-        <Navbar isAdmin={isAdminAuthenticated} onLogout={() => setIsAdminAuthenticated(false)} />
+        <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/rooms" element={<RoomsPage />} />
           <Route path="/booking/:id" element={<BookingPage />} />
-          <Route path="/admin/login" element={<AdminLogin onLogin={() => setIsAdminAuthenticated(true)} />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin"
             element={
-              isAdminAuthenticated ? <AdminPage /> : <AdminLogin onLogin={() => setIsAdminAuthenticated(true)} />
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
             }
           />
         </Routes>
       </div>
     </Router>
+  )
+}
+
+// Main App Component
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   )
 }
 

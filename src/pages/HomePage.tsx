@@ -5,11 +5,10 @@ import { useState } from "react"
 import HeroSearch from "../components/HeroSearch"
 import RoomCard from "../components/RoomCard"
 import FilterChips from "../components/FilterChips"
-import { mockRooms } from "../lib/mockData"
-import type { Room, SearchFilters } from "../lib/types"
+import { useRooms } from "../hooks/useRooms"
+import type { SearchFilters } from "../lib/types"
 
 const HomePage: React.FC = () => {
-  const [filteredRooms, setFilteredRooms] = useState<Room[]>(mockRooms)
   const [filters, setFilters] = useState<SearchFilters>({
     location: "",
     checkIn: "",
@@ -20,32 +19,50 @@ const HomePage: React.FC = () => {
     amenities: [],
   })
 
+  const { rooms, loading, error } = useRooms({
+    location: filters.location,
+    checkIn: filters.checkIn,
+    checkOut: filters.checkOut,
+    guests: filters.guests,
+    minPrice: filters.priceRange[0],
+    maxPrice: filters.priceRange[1],
+    roomType: filters.roomType,
+    amenities: filters.amenities,
+  })
+
   const handleSearch = (searchFilters: SearchFilters) => {
     setFilters(searchFilters)
-
-    const filtered = mockRooms.filter((room) => {
-      const matchesLocation =
-        !searchFilters.location || room.location.toLowerCase().includes(searchFilters.location.toLowerCase())
-
-      const matchesGuests = room.maxGuests >= searchFilters.guests
-
-      const matchesPrice = room.price >= searchFilters.priceRange[0] && room.price <= searchFilters.priceRange[1]
-
-      const matchesType = !searchFilters.roomType || room.type === searchFilters.roomType
-
-      const matchesAmenities =
-        searchFilters.amenities.length === 0 ||
-        searchFilters.amenities.every((amenity) => room.amenities.includes(amenity))
-
-      return matchesLocation && matchesGuests && matchesPrice && matchesType && matchesAmenities
-    })
-
-    setFilteredRooms(filtered)
   }
 
   const handleFilterChange = (newFilters: Partial<SearchFilters>) => {
-    const updatedFilters = { ...filters, ...newFilters }
-    handleSearch(updatedFilters)
+    setFilters((prev) => ({ ...prev, ...newFilters }))
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading rooms...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error: {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -72,16 +89,16 @@ const HomePage: React.FC = () => {
       {/* Results */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">{filteredRooms.length} stays found</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">{rooms.length} stays found</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredRooms.map((room) => (
+          {rooms.map((room) => (
             <RoomCard key={room.id} room={room} />
           ))}
         </div>
 
-        {filteredRooms.length === 0 && (
+        {rooms.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
             <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
