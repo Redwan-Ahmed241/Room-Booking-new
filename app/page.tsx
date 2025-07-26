@@ -1,9 +1,9 @@
-import { supabase } from "@/lib/supabase"
-import type { Room } from "@/lib/types"
-import Navbar from "@/components/navbar"
-import HeroSearch from "@/components/hero-search"
-import RoomCard from "@/components/room-card"
-import { Card, CardContent } from "@/components/ui/card"
+import { supabase } from "../lib/supabase"
+import type { Room } from "../lib/types"
+import Navbar from "../components/navbar"
+import HeroSearch from "../components/hero-search"
+import RoomCard from "../components/room-card"
+import { Card, CardContent } from "../components/ui/card"
 import { Star, Users, MapPin, Award } from "lucide-react"
 
 async function getFeaturedRooms(): Promise<Room[]> {
