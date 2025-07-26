@@ -3,166 +3,175 @@
 import type React from "react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { Menu, X, User, Globe, BombIcon as Balloon, UtensilsCrossed, Home, LogOut } from "lucide-react"
+import { Menu, X, User, Globe } from "lucide-react"
 import Logo from "./Logo"
-import { Button } from "./ui/button"
-import { Badge } from "./ui/badge"
+import { useAuth } from "../hooks/useAuth"
 
-interface NavbarProps {
-  isAdmin?: boolean
-  onLogout?: () => void
-}
-
-const Navbar: React.FC<NavbarProps> = ({ isAdmin = false, onLogout }) => {
+const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const location = useLocation()
+  const { isAuthenticated, logout } = useAuth()
 
-  const isActive = (path: string) => location.pathname === path
+  const handleLogout = () => {
+    logout()
+    setIsUserMenuOpen(false)
+  }
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex-shrink-0">
-            <Logo size="md" />
-          </Link>
-
-          {/* Center Navigation - Airbnb Style */}
-          <div className="hidden lg:flex items-center justify-center flex-1 max-w-2xl mx-8">
-            <div className="flex items-center bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow">
-              <Link
-                to="/"
-                className={`flex items-center px-6 py-3 text-sm font-medium rounded-full transition-colors ${
-                  isActive("/") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Home className="w-4 h-4 mr-2" />
-                Homes
-              </Link>
-
-              <div className="w-px h-6 bg-gray-300" />
-
-              <Link
-                to="/rooms"
-                className={`flex items-center px-6 py-3 text-sm font-medium rounded-full transition-colors ${
-                  isActive("/rooms") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Balloon className="w-4 h-4 mr-2" />
-                Rooms
-              </Link>
-
-              <div className="w-px h-6 bg-gray-300" />
-
-              <Link
-                to="/services"
-                className="flex items-center px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-full transition-colors relative"
-              >
-                <UtensilsCrossed className="w-4 h-4 mr-2" />
-                Services
-                <Badge className="ml-2 bg-pink-500 text-white text-xs px-1.5 py-0.5">NEW</Badge>
-              </Link>
-            </div>
+          <div className="flex-shrink-0">
+            <Link to="/">
+              <Logo />
+            </Link>
           </div>
 
-          {/* Right Side - User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            {isAdmin ? (
-              <>
-                <Link to="/admin">
-                  <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    Admin Dashboard
-                  </Button>
-                </Link>
-                <Button variant="ghost" onClick={onLogout} className="text-sm font-medium text-red-600 hover:bg-red-50">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <Button variant="ghost" className="text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Become a host
-              </Button>
+          {/* Center Navigation - Desktop */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link
+              to="/"
+              className={`text-sm font-medium transition-colors ${
+                location.pathname === "/" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+              }`}
+            >
+              Home
+            </Link>
+            <Link
+              to="/rooms"
+              className={`text-sm font-medium transition-colors ${
+                location.pathname === "/rooms" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+              }`}
+            >
+              Rooms
+            </Link>
+            {isAuthenticated && (
+              <Link
+                to="/admin"
+                className={`text-sm font-medium transition-colors ${
+                  location.pathname === "/admin" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+                }`}
+              >
+                Admin Dashboard
+              </Link>
             )}
+          </div>
 
-            <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-50">
-              <Globe className="w-4 h-4" />
-            </Button>
+          {/* Right Side - Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button className="p-2 text-gray-700 hover:text-pink-500 transition-colors">
+              <Globe className="h-4 w-4" />
+            </button>
 
-            <div className="flex items-center border border-gray-300 rounded-full p-1 hover:shadow-md transition-shadow cursor-pointer">
-              <Menu className="w-4 h-4 ml-3 mr-2 text-gray-700" />
-              <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center mr-1">
-                <User className="w-4 h-4 text-white" />
-              </div>
+            {/* User Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center space-x-2 p-2 border border-gray-300 rounded-full hover:shadow-md transition-shadow"
+              >
+                <Menu className="h-4 w-4 text-gray-700" />
+                <User className="h-6 w-6 text-gray-700 bg-gray-200 rounded-full p-1" />
+              </button>
+
+              {/* User Dropdown */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  {isAuthenticated ? (
+                    <>
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Admin Dashboard
+                      </Link>
+                      <hr className="my-1" />
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      to="/admin/login"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setIsUserMenuOpen(false)}
+                    >
+                      Admin Login
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700">
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </Button>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 text-gray-700 hover:text-pink-500 transition-colors"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden border-t border-gray-200 py-4">
+            <div className="space-y-2">
               <Link
                 to="/"
-                className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
-                  isActive("/") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
+                className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Home className="w-5 h-5 mr-3" />
-                Homes
+                Home
               </Link>
-
               <Link
                 to="/rooms"
-                className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
-                  isActive("/rooms") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
+                className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/rooms" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Balloon className="w-5 h-5 mr-3" />
                 Rooms
               </Link>
-
-              {isAdmin && (
+              {isAuthenticated ? (
                 <>
                   <Link
                     to="/admin"
-                    className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
-                      isActive("/admin") ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50"
+                    className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                      location.pathname === "/admin" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Admin Dashboard
                   </Link>
-                  <Button
-                    variant="ghost"
+                  <button
                     onClick={() => {
-                      onLogout?.()
+                      handleLogout()
                       setIsMenuOpen(false)
                     }}
-                    className="w-full justify-start text-red-600 hover:bg-red-50"
+                    className="block w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:text-pink-500 transition-colors"
                   >
-                    <LogOut className="w-4 h-4 mr-2" />
                     Logout
-                  </Button>
+                  </button>
                 </>
+              ) : (
+                <Link
+                  to="/admin/login"
+                  className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-pink-500 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Admin Login
+                </Link>
               )}
-
-              <div className="pt-4 border-t border-gray-200 mt-4">
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-50">
-                  <User className="w-4 h-4 mr-2" />
-                  Sign up
-                </Button>
-              </div>
             </div>
           </div>
         )}

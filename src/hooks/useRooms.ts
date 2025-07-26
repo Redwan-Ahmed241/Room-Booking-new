@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { roomsApi } from "../lib/api"
+import { mockRooms } from "../lib/mockData"
 import type { Room, SearchFilters } from "../lib/types"
 
 export const useRooms = (filters?: Partial<SearchFilters>) => {
@@ -13,11 +14,39 @@ export const useRooms = (filters?: Partial<SearchFilters>) => {
     try {
       setLoading(true)
       setError(null)
-      const data = await roomsApi.getRooms(filters)
-      setRooms(data)
+
+      // Try to fetch from API first, fallback to mock data
+      try {
+        const data = await roomsApi.getRooms(filters)
+        setRooms(data)
+      } catch (apiError) {
+        console.warn("API not available, using mock data:", apiError)
+        // Filter mock data based on filters
+        let filteredRooms = mockRooms
+
+        if (filters) {
+          filteredRooms = mockRooms.filter((room) => {
+            const matchesLocation =
+              !filters.location || room.location.toLowerCase().includes(filters.location.toLowerCase())
+            const matchesGuests = !filters.guests || room.maxGuests >= filters.guests
+            const matchesPrice =
+              (!filters.minPrice || room.price >= filters.minPrice) &&
+              (!filters.maxPrice || room.price <= filters.maxPrice)
+            const matchesType = !filters.roomType || room.type === filters.roomType
+            const matchesAmenities =
+              !filters.amenities?.length || filters.amenities.every((amenity) => room.amenities.includes(amenity))
+
+            return matchesLocation && matchesGuests && matchesPrice && matchesType && matchesAmenities
+          })
+        }
+
+        setRooms(filteredRooms)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch rooms")
       console.error("Error fetching rooms:", err)
+      // Fallback to mock data even on error
+      setRooms(mockRooms)
     } finally {
       setLoading(false)
     }
@@ -45,11 +74,22 @@ export const useRoom = (id: string) => {
       try {
         setLoading(true)
         setError(null)
-        const data = await roomsApi.getRoom(id)
-        setRoom(data)
+
+        // Try API first, fallback to mock data
+        try {
+          const data = await roomsApi.getRoom(id)
+          setRoom(data)
+        } catch (apiError) {
+          console.warn("API not available, using mock data:", apiError)
+          const mockRoom = mockRooms.find((room) => room.id === id)
+          setRoom(mockRoom || null)
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch room")
         console.error("Error fetching room:", err)
+        // Fallback to mock data
+        const mockRoom = mockRooms.find((room) => room.id === id)
+        setRoom(mockRoom || null)
       } finally {
         setLoading(false)
       }
