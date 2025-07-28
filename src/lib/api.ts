@@ -1,4 +1,7 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api"
+// Vite environment variable typing for TypeScript
+/// <reference types="vite/client" />
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"
 
 // API response types
 interface ApiResponse<T> {

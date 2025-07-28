@@ -18,13 +18,15 @@ const RoomsPage: React.FC = () => {
     amenities: [],
   })
 
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showFilters, setShowFilters] = useState(false);
+
   const { rooms, loading, error } = useRooms({
     location: filters.location,
     checkIn: filters.checkIn,
     checkOut: filters.checkOut,
     guests: filters.guests,
-    minPrice: filters.priceRange[0],
-    maxPrice: filters.priceRange[1],
+    priceRange: filters.priceRange,
     roomType: filters.roomType,
     amenities: filters.amenities,
   })
@@ -74,6 +76,45 @@ const RoomsPage: React.FC = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <FilterChips filters={filters} onFilterChange={handleFilterChange} />
+          <div className="flex items-center gap-2 mt-4">
+            <button
+              className="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded px-3 py-1"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              More Filters
+            </button>
+            <div className="flex border border-slate-300 rounded-lg">
+              <button
+                className={`rounded-r-none border-0 px-3 py-1 ${viewMode === 'grid' ? 'bg-gray-200' : ''}`}
+                onClick={() => setViewMode('grid')}
+              >
+                Grid
+              </button>
+              <button
+                className={`rounded-l-none border-0 px-3 py-1 ${viewMode === 'list' ? 'bg-gray-200' : ''}`}
+                onClick={() => setViewMode('list')}
+              >
+                List
+              </button>
+            </div>
+          </div>
+          {showFilters && (
+            <div className="mt-6 pt-6 border-t border-slate-200 space-y-6">
+              {/* Additional filter UI can be added here, e.g., price range, villa name, etc. */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-slate-700 font-medium">Villa Name</label>
+                  <input
+                    placeholder="Search villa..."
+                    value={filters.location}
+                    onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                    className="border-slate-300 focus:border-primary-500 focus:ring-primary-500 rounded px-2 py-1 w-full"
+                  />
+                </div>
+                {/* Example: Add a price range slider here if you have one */}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -82,14 +123,19 @@ const RoomsPage: React.FC = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-gray-900">{rooms.length} rooms available</h2>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {rooms.map((room) => (
-            <RoomCard key={room.id} room={room} />
-          ))}
-        </div>
-
-        {rooms.length === 0 && (
+        {loading ? (
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' : 'space-y-6'}>
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse border-0 shadow-sm bg-gray-100 rounded-lg h-64" />
+            ))}
+          </div>
+        ) : rooms.length > 0 ? (
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' : 'space-y-6'}>
+            {rooms.map((room) => (
+              <RoomCard key={room.id} room={room} />
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
             <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>

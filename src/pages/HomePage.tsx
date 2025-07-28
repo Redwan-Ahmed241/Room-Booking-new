@@ -105,6 +105,109 @@ const HomePage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Featured Accommodations Section (from app/page.tsx) */}
+      <section className="py-16 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Featured Accommodations</h2>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Discover our most popular rooms with exceptional ratings and stunning amenities
+          </p>
+        </div>
+        {/* You can use rooms.filter(...) or a separate featuredRooms state if you want to show only featured */}
+        {rooms.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {rooms.slice(0, 6).map((room) => (
+              <RoomCard key={room.id} room={room} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-slate-600 mb-4">No rooms available at the moment.</p>
+            <p className="text-sm text-slate-500">Please check back later or contact us for availability.</p>
+          </div>
+        )}
+      </section>
+
+      {/* Stats Section (from app/page.tsx) */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Example stat cards, you can adjust values as needed */}
+            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
+              <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {/* MapPin icon placeholder */}
+                <span role="img" aria-label="MapPin">📍</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">1+</h3>
+              <p className="text-slate-600">Premium Villas</p>
+            </div>
+            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
+              <div className="w-12 h-12 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {/* Users icon placeholder */}
+                <span role="img" aria-label="Users">👥</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">9+</h3>
+              <p className="text-slate-600">Luxury Rooms</p>
+            </div>
+            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {/* Star icon placeholder */}
+                <span role="img" aria-label="Star">⭐</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">4.8</h3>
+              <p className="text-slate-600">Average Rating</p>
+            </div>
+            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {/* Award icon placeholder */}
+                <span role="img" aria-label="Award">🏆</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">100%</h3>
+              <p className="text-slate-600">Satisfaction Rate</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section (from app/page.tsx) */}
+      <section className="py-16 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Why Choose VillaEase?</h2>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Experience luxury, comfort, and exceptional service in every stay
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span role="img" aria-label="Star">⭐</span>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">Premium Quality</h3>
+            <p className="text-slate-600">
+              Every room is carefully selected and maintained to ensure the highest standards of luxury and comfort.
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span role="img" aria-label="Users">👥</span>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">24/7 Support</h3>
+            <p className="text-slate-600">
+              Our dedicated team is available around the clock to ensure your stay is perfect from start to finish.
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span role="img" aria-label="MapPin">📍</span>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-4">Prime Locations</h3>
+            <p className="text-slate-600">
+              All our villas are located in the most desirable destinations with easy access to attractions and amenities.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
