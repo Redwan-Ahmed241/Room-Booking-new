@@ -198,6 +198,42 @@ export const authApi = {
   },
 }
 
+export async function login(username: string, password: string) {
+  const response = await fetch('/api/login/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!response.ok) throw new Error('Login failed');
+  return response.json();
+}
+
+export async function register(data: {
+  username: string;
+  email: string;
+  mobile_no: string;
+  password: string;
+  confirm_password: string;
+}) {
+  const response = await fetch('/api/register/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Registration failed');
+  return response.json();
+}
+
+export async function logout(refresh: string) {
+  const response = await fetch('/api/logout/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh }),
+  });
+  if (!response.ok) throw new Error('Logout failed');
+  return response.json();
+}
+
 // Upload API functions
 export const uploadApi = {
   // Upload room images

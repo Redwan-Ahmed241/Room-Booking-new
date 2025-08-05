@@ -33,26 +33,23 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className={`text-sm font-medium transition-colors ${
-                location.pathname === "/" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
-              }`}
+              className={`text-sm font-medium transition-colors ${location.pathname === "/" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+                }`}
             >
               Home
             </Link>
             <Link
               to="/rooms"
-              className={`text-sm font-medium transition-colors ${
-                location.pathname === "/rooms" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
-              }`}
+              className={`text-sm font-medium transition-colors ${location.pathname === "/rooms" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+                }`}
             >
               Rooms
             </Link>
             {isAuthenticated && (
               <Link
                 to="/admin"
-                className={`text-sm font-medium transition-colors ${
-                  location.pathname === "/admin" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
-                }`}
+                className={`text-sm font-medium transition-colors ${location.pathname === "/admin" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+                  }`}
               >
                 Admin Dashboard
               </Link>
@@ -96,13 +93,29 @@ const Navbar: React.FC = () => {
                       </button>
                     </>
                   ) : (
-                    <Link
-                      to="/admin/login"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      Admin Login
-                    </Link>
+                    <>
+                      <Link
+                        to="/login"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/register"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Register
+                      </Link>
+                      <Link
+                        to="/admin/login"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Admin Login
+                      </Link>
+                    </>
                   )}
                 </div>
               )}
@@ -126,18 +139,16 @@ const Navbar: React.FC = () => {
             <div className="space-y-2">
               <Link
                 to="/"
-                className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                  location.pathname === "/" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
-                }`}
+                className={`block px-4 py-2 text-sm font-medium transition-colors ${location.pathname === "/" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+                  }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/rooms"
-                className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                  location.pathname === "/rooms" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
-                }`}
+                className={`block px-4 py-2 text-sm font-medium transition-colors ${location.pathname === "/rooms" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+                  }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Rooms
@@ -146,9 +157,8 @@ const Navbar: React.FC = () => {
                 <>
                   <Link
                     to="/admin"
-                    className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                      location.pathname === "/admin" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
-                    }`}
+                    className={`block px-4 py-2 text-sm font-medium transition-colors ${location.pathname === "/admin" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Admin Dashboard
