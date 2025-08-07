@@ -99,7 +99,7 @@ const HomePage: React.FC = () => {
       </div>
       {/* Mini Villa Navbar */}
       {villaNames.length > 0 && (
-        <div className="flex space-x-4 justify-center py-4 bg-gray-50 border-b-0" style={{ borderBottom: '1px solid transparent' }}>
+        <div className="flex space-x-4 justify-center py-4 bg-white border-b-0" style={{ borderBottom: '1px solid transparent' }}>
           {villaNames.map((villa) => (
             <button
               key={villa}
