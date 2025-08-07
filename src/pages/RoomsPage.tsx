@@ -77,12 +77,7 @@ const RoomsPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <FilterChips filters={filters} onFilterChange={handleFilterChange} />
           <div className="flex items-center gap-2 mt-4">
-            <button
-              className="border border-slate-300 text-slate-700 hover:bg-slate-50 rounded px-3 py-1"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              More Filters
-            </button>
+            
             <div className="flex border border-slate-300 rounded-lg">
               <button
                 className={`rounded-r-none border-0 px-3 py-1 ${viewMode === 'grid' ? 'bg-gray-200' : ''}`}
@@ -98,23 +93,7 @@ const RoomsPage: React.FC = () => {
               </button>
             </div>
           </div>
-          {showFilters && (
-            <div className="mt-6 pt-6 border-t border-slate-200 space-y-6">
-              {/* Additional filter UI can be added here, e.g., price range, villa name, etc. */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-medium">Villa Name</label>
-                  <input
-                    placeholder="Search villa..."
-                    value={filters.location}
-                    onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-                    className="border-slate-300 focus:border-primary-500 focus:ring-primary-500 rounded px-2 py-1 w-full"
-                  />
-                </div>
-                {/* Example: Add a price range slider here if you have one */}
-              </div>
-            </div>
-          )}
+          
         </div>
       </div>
 
