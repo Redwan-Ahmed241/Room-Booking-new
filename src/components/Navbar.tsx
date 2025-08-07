@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { Menu, X, User, Globe } from "lucide-react"
+import { Menu, X, User } from "lucide-react"
 import Logo from "./Logo"
 import { useAuth } from "../hooks/useAuth"
 
@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
               className={`text-sm font-medium transition-colors ${location.pathname === "/" ? "text-pink-500" : "text-gray-700 hover:text-pink-500"
                 }`}
             >
-              Home
+              Villas
             </Link>
             <Link
               to="/rooms"
@@ -58,10 +58,6 @@ const Navbar: React.FC = () => {
 
           {/* Right Side - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="p-2 text-gray-700 hover:text-pink-500 transition-colors">
-              <Globe className="h-4 w-4" />
-            </button>
-
             {/* User Menu */}
             <div className="relative">
               <button

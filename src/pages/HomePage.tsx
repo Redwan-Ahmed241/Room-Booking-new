@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import HeroSearch from "../components/HeroSearch"
 import RoomCard from "../components/RoomCard"
 import FilterChips from "../components/FilterChips"
@@ -28,6 +28,26 @@ const HomePage: React.FC = () => {
     roomType: filters.roomType,
     amenities: filters.amenities,
   })
+
+  const [selectedVilla, setSelectedVilla] = useState<string>("")
+
+  const villaNames = useMemo(() => {
+    const villas = rooms.filter((room) => room.type === "villa")
+    // Extract base villa name (before dash, or just first word(s))
+    const names = villas.map((room) => room.name.split(" - ")[0].trim())
+    return Array.from(new Set(names))
+  }, [rooms])
+
+  useEffect(() => {
+    if (villaNames.length > 0 && !selectedVilla) {
+      setSelectedVilla(villaNames[0])
+    }
+  }, [villaNames, selectedVilla])
+
+  const filteredRooms = useMemo(() => {
+    if (!selectedVilla) return rooms
+    return rooms.filter((room) => room.name.startsWith(selectedVilla))
+  }, [rooms, selectedVilla])
 
   const handleSearch = (searchFilters: SearchFilters) => {
     setFilters(searchFilters)
@@ -77,7 +97,20 @@ const HomePage: React.FC = () => {
           <HeroSearch onSearch={handleSearch} />
         </div>
       </div>
-
+      {/* Mini Villa Navbar */}
+      {villaNames.length > 0 && (
+        <div className="flex space-x-4 justify-center py-4 bg-gray-50 border-b-0" style={{ borderBottom: '1px solid transparent' }}>
+          {villaNames.map((villa) => (
+            <button
+              key={villa}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors ${selectedVilla === villa ? "bg-pink-500 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-pink-100"}`}
+              onClick={() => setSelectedVilla(villa)}
+            >
+              {villa}
+            </button>
+          ))}
+        </div>
+      )}
       {/* Filters */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -85,19 +118,21 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
+
+
       {/* Results */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">{rooms.length} stays found</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">{filteredRooms.length} stays found</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {rooms.map((room) => (
+          {filteredRooms.map((room) => (
             <RoomCard key={room.id} room={room} />
           ))}
         </div>
 
-        {rooms.length === 0 && (
+        {filteredRooms.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
             <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
@@ -114,9 +149,9 @@ const HomePage: React.FC = () => {
           </p>
         </div>
         {/* You can use rooms.filter(...) or a separate featuredRooms state if you want to show only featured */}
-        {rooms.length > 0 ? (
+        {filteredRooms.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {rooms.slice(0, 6).map((room) => (
+            {filteredRooms.slice(0, 6).map((room) => (
               <RoomCard key={room.id} room={room} />
             ))}
           </div>

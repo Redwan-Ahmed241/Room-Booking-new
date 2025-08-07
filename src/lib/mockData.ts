@@ -3,8 +3,8 @@ import type { Room } from "./types"
 export const mockRooms: Room[] = [
   {
     id: "1",
-    name: "Ocean View Suite",
-    type: "suite",
+    name: "Moorfield Villa - Ocean View Suite",
+    type: "villa",
     price: 250,
     rating: 4.8,
     reviews: 124,
@@ -24,8 +24,8 @@ export const mockRooms: Room[] = [
   },
   {
     id: "2",
-    name: "Deluxe Garden Room",
-    type: "room",
+    name: "Moorfield Villa - Deluxe Garden Room",
+    type: "villa",
     price: 180,
     rating: 4.6,
     reviews: 89,
@@ -45,8 +45,8 @@ export const mockRooms: Room[] = [
   },
   {
     id: "3",
-    name: "Family Suite",
-    type: "suite",
+    name: "Moorfield Villa - Family Suite",
+    type: "villa",
     price: 320,
     rating: 4.9,
     reviews: 156,
@@ -66,7 +66,7 @@ export const mockRooms: Room[] = [
   },
   {
     id: "4",
-    name: "Presidential Villa",
+    name: "Moorfield Villa - Presidential Suite",
     type: "villa",
     price: 500,
     rating: 5.0,
@@ -87,8 +87,8 @@ export const mockRooms: Room[] = [
   },
   {
     id: "5",
-    name: "Cozy Beach Cottage",
-    type: "room",
+    name: "Moorfield Villa - Cozy Beach Cottage",
+    type: "villa",
     price: 150,
     rating: 4.4,
     reviews: 92,
@@ -108,8 +108,8 @@ export const mockRooms: Room[] = [
   },
   {
     id: "6",
-    name: "Mountain View Lodge",
-    type: "suite",
+    name: "Moorfield Villa - Mountain View Lodge",
+    type: "villa",
     price: 220,
     rating: 4.7,
     reviews: 134,
