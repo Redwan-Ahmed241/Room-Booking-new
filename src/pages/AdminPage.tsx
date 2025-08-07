@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, Edit, Trash2, Eye, EyeOff, Save, X } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
@@ -9,12 +9,14 @@ import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Badge } from "../components/ui/badge"
 import { Textarea } from "../components/ui/textarea"
-import { mockRooms, popularAmenities } from "../lib/mockData"
+import { roomsApi } from "../lib/api"
 import { formatPrice } from "../lib/utils"
 import type { Room } from "../lib/types"
 
 const AdminPage: React.FC = () => {
-  const [rooms, setRooms] = useState<Room[]>(mockRooms)
+  const [rooms, setRooms] = useState<Room[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isAddingRoom, setIsAddingRoom] = useState(false)
   const [editingRoom, setEditingRoom] = useState<string | null>(null)
   const [newRoom, setNewRoom] = useState<Partial<Room>>({
@@ -34,56 +36,96 @@ const AdminPage: React.FC = () => {
     available: true,
   })
 
-  const generateId = () => Math.random().toString(36).substr(2, 9)
+  // Fetch rooms on component mount
+  useEffect(() => {
+    fetchRooms()
+  }, [])
 
-  const handleAddRoom = () => {
+  const fetchRooms = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const response = await roomsApi.getRooms()
+      setRooms(response.data || response)
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch rooms")
+      console.error("Error fetching rooms:", err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAddRoom = async () => {
     if (newRoom.name && newRoom.location && newRoom.price) {
-      const room: Room = {
-        id: generateId(),
-        name: newRoom.name,
-        type: newRoom.type || "room",
-        price: newRoom.price,
-        rating: newRoom.rating || 4.5,
-        reviews: newRoom.reviews || 0,
-        images: newRoom.images?.filter((img) => img.trim()) || ["/placeholder.svg"],
-        amenities: newRoom.amenities || [],
-        description: newRoom.description || "",
-        location: newRoom.location,
-        maxGuests: newRoom.maxGuests || 1,
-        bedrooms: newRoom.bedrooms || 1,
-        bathrooms: newRoom.bathrooms || 1,
-        size: newRoom.size || 30,
-        available: newRoom.available ?? true,
+      try {
+        const roomData = {
+          name: newRoom.name,
+          type: newRoom.type || "room",
+          price: newRoom.price,
+          rating: newRoom.rating || 4.5,
+          reviews: newRoom.reviews || 0,
+          images: newRoom.images?.filter((img) => img.trim()) || ["/placeholder.svg"],
+          amenities: newRoom.amenities || [],
+          description: newRoom.description || "",
+          location: newRoom.location,
+          maxGuests: newRoom.maxGuests || 1,
+          bedrooms: newRoom.bedrooms || 1,
+          bathrooms: newRoom.bathrooms || 1,
+          size: newRoom.size || 30,
+          available: newRoom.available ?? true,
+        }
+
+        await roomsApi.createRoom(roomData)
+        await fetchRooms() // Refresh the list
+
+        // Reset form
+        setNewRoom({
+          name: "",
+          type: "room",
+          price: 0,
+          rating: 4.5,
+          reviews: 0,
+          images: [""],
+          amenities: [],
+          description: "",
+          location: "",
+          maxGuests: 1,
+          bedrooms: 1,
+          bathrooms: 1,
+          size: 30,
+          available: true,
+        })
+        setIsAddingRoom(false)
+      } catch (err: any) {
+        setError(err.message || "Failed to create room")
+        console.error("Error creating room:", err)
       }
-      setRooms([...rooms, room])
-      setNewRoom({
-        name: "",
-        type: "room",
-        price: 0,
-        rating: 4.5,
-        reviews: 0,
-        images: [""],
-        amenities: [],
-        description: "",
-        location: "",
-        maxGuests: 1,
-        bedrooms: 1,
-        bathrooms: 1,
-        size: 30,
-        available: true,
-      })
-      setIsAddingRoom(false)
     }
   }
 
-  const handleDeleteRoom = (id: string) => {
+  const handleDeleteRoom = async (id: string) => {
     if (confirm("Are you sure you want to delete this room?")) {
-      setRooms(rooms.filter((room) => room.id !== id))
+      try {
+        await roomsApi.deleteRoom(id)
+        await fetchRooms() // Refresh the list
+      } catch (err: any) {
+        setError(err.message || "Failed to delete room")
+        console.error("Error deleting room:", err)
+      }
     }
   }
 
-  const toggleAvailability = (id: string) => {
-    setRooms(rooms.map((room) => (room.id === id ? { ...room, available: !room.available } : room)))
+  const toggleAvailability = async (id: string) => {
+    try {
+      const room = rooms.find(r => r.id === id)
+      if (room) {
+        await roomsApi.updateRoom(id, { available: !room.available })
+        await fetchRooms() // Refresh the list
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to update room availability")
+      console.error("Error updating room:", err)
+    }
   }
 
   const addAmenity = (amenity: string) => {
@@ -127,7 +169,18 @@ const AdminPage: React.FC = () => {
 
   const totalRooms = rooms.length
   const availableRooms = rooms.filter((room) => room.available).length
-  const averagePrice = rooms.reduce((sum, room) => sum + room.price, 0) / rooms.length
+  const averagePrice = rooms.length > 0 ? rooms.reduce((sum, room) => sum + room.price, 0) / rooms.length : 0
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading rooms...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -137,6 +190,21 @@ const AdminPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
           <p className="text-gray-600">Manage your rooms and villas</p>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600">{error}</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setError(null)}
+              className="mt-2 text-red-600 hover:text-red-700"
+            >
+              Dismiss
+            </Button>
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -318,7 +386,7 @@ const AdminPage: React.FC = () => {
               <div>
                 <Label>Amenities</Label>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {popularAmenities.map((amenity) => (
+                  {["WiFi", "Air Conditioning", "TV", "Kitchen", "Pool", "Gym", "Parking", "Breakfast"].map((amenity) => (
                     <Badge
                       key={amenity}
                       variant={newRoom.amenities?.includes(amenity) ? "default" : "outline"}
@@ -355,79 +423,85 @@ const AdminPage: React.FC = () => {
             <CardTitle>All Rooms</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4">Room</th>
-                    <th className="text-left py-3 px-4">Type</th>
-                    <th className="text-left py-3 px-4">Location</th>
-                    <th className="text-left py-3 px-4">Price</th>
-                    <th className="text-left py-3 px-4">Rating</th>
-                    <th className="text-left py-3 px-4">Status</th>
-                    <th className="text-left py-3 px-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rooms.map((room) => (
-                    <tr key={room.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={room.images[0] || "/placeholder.svg"}
-                            alt={room.name}
-                            className="w-12 h-12 object-cover rounded-lg"
-                          />
-                          <div>
-                            <div className="font-medium text-gray-900">{room.name}</div>
-                            <div className="text-sm text-gray-500">
-                              {room.bedrooms} bed • {room.bathrooms} bath
+            {rooms.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No rooms found. Add your first room to get started.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4">Room</th>
+                      <th className="text-left py-3 px-4">Type</th>
+                      <th className="text-left py-3 px-4">Location</th>
+                      <th className="text-left py-3 px-4">Price</th>
+                      <th className="text-left py-3 px-4">Rating</th>
+                      <th className="text-left py-3 px-4">Status</th>
+                      <th className="text-left py-3 px-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rooms.map((room) => (
+                      <tr key={room.id} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={room.images?.[0] || "/placeholder.svg"}
+                              alt={room.name}
+                              className="w-12 h-12 object-cover rounded-lg"
+                            />
+                            <div>
+                              <div className="font-medium text-gray-900">{room.name}</div>
+                              <div className="text-sm text-gray-500">
+                                {room.bedrooms} bed • {room.bathrooms} bath
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge variant="outline" className="capitalize">
-                          {room.type}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">{room.location}</td>
-                      <td className="py-3 px-4 font-medium">{formatPrice(room.price)}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-1">
-                          <span className="text-yellow-500">★</span>
-                          <span>{room.rating}</span>
-                          <span className="text-gray-500 text-sm">({room.reviews})</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge variant={room.available ? "default" : "secondary"}>
-                          {room.available ? "Available" : "Unavailable"}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
-                            {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => setEditingRoom(room.id)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteRoom(room.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline" className="capitalize">
+                            {room.type}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-gray-600">{room.location}</td>
+                        <td className="py-3 px-4 font-medium">{formatPrice(room.price)}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-1">
+                            <span className="text-yellow-500">★</span>
+                            <span>{room.rating}</span>
+                            <span className="text-gray-500 text-sm">({room.reviews})</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant={room.available ? "default" : "secondary"}>
+                            {room.available ? "Available" : "Unavailable"}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-2">
+                            <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
+                              {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => setEditingRoom(room.id)}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteRoom(room.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

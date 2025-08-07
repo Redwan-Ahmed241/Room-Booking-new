@@ -10,6 +10,7 @@ import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Badge } from "../components/ui/badge"
 import { useRoom } from "../hooks/useRooms"
+import { bookingsApi } from "../lib/api"
 import { formatPrice } from "../lib/utils"
 import type { BookingData } from "../lib/types"
 
@@ -30,6 +31,7 @@ const BookingPage: React.FC = () => {
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const handleInputChange = (field: string, value: string | number) => {
     if (field.startsWith("guestInfo.")) {
@@ -62,15 +64,33 @@ const BookingPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitError(null)
 
     try {
-      // Simulate booking submission
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      if (!room || !id) {
+        throw new Error("Room information not available")
+      }
 
+      const bookingPayload = {
+        roomId: id,
+        checkIn: bookingData.checkIn!,
+        checkOut: bookingData.checkOut!,
+        guests: bookingData.guests!,
+        guestInfo: {
+          name: bookingData.guestInfo!.name,
+          email: bookingData.guestInfo!.email,
+          phone: bookingData.guestInfo!.phone,
+        }
+      }
+
+      await bookingsApi.createBooking(bookingPayload)
+
+      // Show success message and redirect
       alert("Booking submitted successfully!")
       navigate("/")
-    } catch (err) {
-      alert("Failed to submit booking. Please try again.")
+    } catch (err: any) {
+      setSubmitError(err.message || "Failed to submit booking. Please try again.")
+      console.error("Booking submission error:", err)
     } finally {
       setIsSubmitting(false)
     }
@@ -109,7 +129,7 @@ const BookingPage: React.FC = () => {
           {/* Room Details */}
           <div>
             <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-              <img src={room.images[0] || "/placeholder.svg"} alt={room.name} className="w-full h-64 object-cover" />
+              <img src={room.images?.[0] || "/placeholder.svg"} alt={room.name} className="w-full h-64 object-cover" />
               <div className="p-6">
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">{room.name}</h1>
                 <div className="flex items-center text-gray-600 mb-4">
@@ -139,7 +159,7 @@ const BookingPage: React.FC = () => {
                 <div className="mb-6">
                   <h3 className="font-semibold text-gray-900 mb-3">Amenities</h3>
                   <div className="flex flex-wrap gap-2">
-                    {room.amenities.map((amenity) => (
+                    {room.amenities?.map((amenity) => (
                       <Badge key={amenity} variant="outline">
                         {amenity}
                       </Badge>
@@ -248,7 +268,7 @@ const BookingPage: React.FC = () => {
                           {formatPrice(room.price)} x{" "}
                           {Math.ceil(
                             (new Date(bookingData.checkOut!).getTime() - new Date(bookingData.checkIn!).getTime()) /
-                              (1000 * 60 * 60 * 24),
+                            (1000 * 60 * 60 * 24),
                           )}{" "}
                           nights
                         </span>
@@ -259,6 +279,12 @@ const BookingPage: React.FC = () => {
                         <span>Total</span>
                         <span className="text-pink-500">{formatPrice(totalPrice)}</span>
                       </div>
+                    </div>
+                  )}
+
+                  {submitError && (
+                    <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md">
+                      {submitError}
                     </div>
                   )}
 

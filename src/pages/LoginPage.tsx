@@ -22,10 +22,12 @@ const LoginPage: React.FC = () => {
             const data = await login(username, password);
             localStorage.setItem("access", data.access);
             localStorage.setItem("refresh", data.refresh);
-            localStorage.setItem("user", JSON.stringify(data));
+            if (data.user) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+            }
             window.location.href = "/";
-        } catch (err) {
-            setError("Invalid username or password");
+        } catch (err: any) {
+            setError(err.message || "Invalid username or password");
         } finally {
             setIsLoading(false);
         }

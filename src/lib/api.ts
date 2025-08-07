@@ -1,13 +1,25 @@
 // Vite environment variable typing for TypeScript
 /// <reference types="vite/client" />
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api"
+const API_BASE_URL = "https://room-booking-pjo6.onrender.com/api"
 
 // API response types
 interface ApiResponse<T> {
   data: T
   success: boolean
   message?: string
+}
+
+// Auth response types
+interface LoginResponse {
+  access: string
+  refresh: string
+  user?: any
+}
+
+interface RegisterResponse {
+  message: string
+  user?: any
 }
 
 // Room API functions
@@ -56,11 +68,12 @@ export const roomsApi = {
 
   // Create new room (admin only)
   createRoom: async (roomData: Partial<Room>) => {
+    const accessToken = localStorage.getItem("access")
     const response = await fetch(`${API_BASE_URL}/rooms`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(roomData),
     })
@@ -72,11 +85,12 @@ export const roomsApi = {
 
   // Update room (admin only)
   updateRoom: async (id: string, roomData: Partial<Room>) => {
+    const accessToken = localStorage.getItem("access")
     const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(roomData),
     })
@@ -88,10 +102,11 @@ export const roomsApi = {
 
   // Delete room (admin only)
   deleteRoom: async (id: string) => {
+    const accessToken = localStorage.getItem("access")
     const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     })
     if (!response.ok) {
@@ -115,10 +130,12 @@ export const bookingsApi = {
       phone: string
     }
   }) => {
+    const accessToken = localStorage.getItem("access")
     const response = await fetch(`${API_BASE_URL}/bookings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(bookingData),
     })
@@ -130,9 +147,10 @@ export const bookingsApi = {
 
   // Get all bookings (admin only)
   getBookings: async () => {
+    const accessToken = localStorage.getItem("access")
     const response = await fetch(`${API_BASE_URL}/bookings`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     })
     if (!response.ok) {
@@ -143,11 +161,12 @@ export const bookingsApi = {
 
   // Update booking status (admin only)
   updateBookingStatus: async (id: string, status: string) => {
+    const accessToken = localStorage.getItem("access")
     const response = await fetch(`${API_BASE_URL}/bookings/${id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ status }),
     })
@@ -162,7 +181,7 @@ export const bookingsApi = {
 export const authApi = {
   // Admin login
   login: async (credentials: { username: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/jwt/login/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -173,15 +192,16 @@ export const authApi = {
       throw new Error("Invalid credentials")
     }
     const data = await response.json()
-    if (data.token) {
-      localStorage.setItem("adminToken", data.token)
+    if (data.access) {
+      localStorage.setItem("access", data.access)
+      localStorage.setItem("refresh", data.refresh)
     }
     return data
   },
 
   // Verify token
   verifyToken: async () => {
-    const token = localStorage.getItem("adminToken")
+    const token = localStorage.getItem("access")
     if (!token) return false
 
     const response = await fetch(`${API_BASE_URL}/auth/verify`, {
@@ -193,18 +213,38 @@ export const authApi = {
   },
 
   // Logout
-  logout: () => {
-    localStorage.removeItem("adminToken")
+  logout: async () => {
+    const refresh = localStorage.getItem("refresh")
+    if (refresh) {
+      try {
+        await fetch(`${API_BASE_URL}/auth/logout/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ refresh }),
+        })
+      } catch (error) {
+        console.warn("Logout API call failed:", error)
+      }
+    }
+    localStorage.removeItem("access")
+    localStorage.removeItem("refresh")
+    localStorage.removeItem("user")
   },
 }
 
-export async function login(username: string, password: string) {
-  const response = await fetch('/api/login/', {
+// User authentication functions
+export async function login(username: string, password: string): Promise<LoginResponse> {
+  const response = await fetch(`${API_BASE_URL}/auth/jwt/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
-  if (!response.ok) throw new Error('Login failed');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Login failed');
+  }
   return response.json();
 }
 
@@ -214,24 +254,39 @@ export async function register(data: {
   mobile_no: string;
   password: string;
   confirm_password: string;
-}) {
-  const response = await fetch('/api/register/', {
+}): Promise<RegisterResponse> {
+  const response = await fetch(`${API_BASE_URL}/auth/register/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Registration failed');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Registration failed');
+  }
   return response.json();
 }
 
-export async function logout(refresh: string) {
-  const response = await fetch('/api/logout/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh }),
-  });
-  if (!response.ok) throw new Error('Logout failed');
-  return response.json();
+export async function logout(): Promise<void> {
+  const refresh = localStorage.getItem("refresh");
+  if (refresh) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/logout/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh }),
+      });
+      if (!response.ok) {
+        console.warn('Logout API call failed');
+      }
+    } catch (error) {
+      console.warn('Logout API call failed:', error);
+    }
+  }
+  // Always clear local storage regardless of API call success
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
+  localStorage.removeItem("user");
 }
 
 // Upload API functions
@@ -243,10 +298,11 @@ export const uploadApi = {
       formData.append("images", file)
     })
 
+    const accessToken = localStorage.getItem("access")
     const response = await fetch(`${API_BASE_URL}/upload/images`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: formData,
     })

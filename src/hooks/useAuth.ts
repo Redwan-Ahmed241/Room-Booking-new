@@ -27,8 +27,8 @@ export const useAuthProvider = (): AuthContextType => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("adminToken")
-        if (token) {
+        const accessToken = localStorage.getItem("access")
+        if (accessToken) {
           // Try to verify token with API, fallback to simple check
           try {
             const isValid = await authApi.verifyToken()
@@ -36,7 +36,7 @@ export const useAuthProvider = (): AuthContextType => {
           } catch (error) {
             console.warn("API not available for token verification, checking locally")
             // Simple fallback - just check if token exists
-            setIsAuthenticated(!!token)
+            setIsAuthenticated(!!accessToken)
           }
         }
       } catch (error) {
@@ -61,7 +61,8 @@ export const useAuthProvider = (): AuthContextType => {
         console.warn("API not available, using fallback auth:", apiError)
         // Fallback authentication for development
         if (credentials.username === "admin" && credentials.password === "admin123") {
-          localStorage.setItem("adminToken", "mock-token-" + Date.now())
+          localStorage.setItem("access", "mock-token-" + Date.now())
+          localStorage.setItem("refresh", "mock-refresh-" + Date.now())
           setIsAuthenticated(true)
           return true
         }
@@ -73,13 +74,15 @@ export const useAuthProvider = (): AuthContextType => {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
     try {
-      authApi.logout()
+      await authApi.logout()
     } catch (error) {
       console.warn("API logout failed, clearing local storage:", error)
     }
-    localStorage.removeItem("adminToken")
+    localStorage.removeItem("access")
+    localStorage.removeItem("refresh")
+    localStorage.removeItem("user")
     setIsAuthenticated(false)
   }
 

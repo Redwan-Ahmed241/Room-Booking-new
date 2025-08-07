@@ -33,8 +33,16 @@ const RegisterPage: React.FC = () => {
         try {
             const data = await register(form);
             setSuccess(data.message || "Registration successful. Check your email.");
-        } catch (err) {
-            setError("Registration failed. Please check your details.");
+            // Clear form on success
+            setForm({
+                username: "",
+                email: "",
+                mobile_no: "",
+                password: "",
+                confirm_password: "",
+            });
+        } catch (err: any) {
+            setError(err.message || "Registration failed. Please check your details.");
         } finally {
             setIsLoading(false);
         }

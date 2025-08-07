@@ -34,8 +34,8 @@ const AdminLogin: React.FC = () => {
       if (!success) {
         setError("Invalid username or password")
       }
-    } catch (err) {
-      setError("Login failed. Please try again.")
+    } catch (err: any) {
+      setError(err.message || "Login failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
