@@ -18,7 +18,7 @@ const AdminPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAddingRoom, setIsAddingRoom] = useState(false)
-  const [editingRoom, setEditingRoom] = useState<string | null>(null)
+
   const [newRoom, setNewRoom] = useState<Partial<Room>>({
     name: "",
     type: "room",
@@ -483,7 +483,7 @@ const AdminPage: React.FC = () => {
                             <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
                               {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => setEditingRoom(room.id)}>
+                            <Button variant="ghost" size="sm" onClick={() => console.log('Edit room:', room.id)}>
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button

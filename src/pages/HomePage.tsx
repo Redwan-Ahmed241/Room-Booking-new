@@ -15,6 +15,8 @@ const HomePage: React.FC = () => {
     checkOut: "",
     guests: 1,
     priceRange: [0, 1000],
+    minPrice: 0,
+    maxPrice: 1000,
     roomType: "",
     amenities: [],
   })
@@ -24,7 +26,8 @@ const HomePage: React.FC = () => {
     checkIn: filters.checkIn,
     checkOut: filters.checkOut,
     guests: filters.guests,
-    priceRange: filters.priceRange,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
     roomType: filters.roomType,
     amenities: filters.amenities,
   })

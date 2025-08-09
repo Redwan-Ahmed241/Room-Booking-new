@@ -14,19 +14,21 @@ const RoomsPage: React.FC = () => {
     checkOut: "",
     guests: 1,
     priceRange: [0, 1000],
+    minPrice: 0,
+    maxPrice: 1000,
     roomType: "",
     amenities: [],
   })
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showFilters, setShowFilters] = useState(false);
 
   const { rooms, loading, error } = useRooms({
     location: filters.location,
     checkIn: filters.checkIn,
     checkOut: filters.checkOut,
     guests: filters.guests,
-    priceRange: filters.priceRange,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
     roomType: filters.roomType,
     amenities: filters.amenities,
   })
@@ -77,7 +79,7 @@ const RoomsPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <FilterChips filters={filters} onFilterChange={handleFilterChange} />
           <div className="flex items-center gap-2 mt-4">
-            
+
             <div className="flex border border-slate-300 rounded-lg">
               <button
                 className={`rounded-r-none border-0 px-3 py-1 ${viewMode === 'grid' ? 'bg-gray-200' : ''}`}
@@ -93,7 +95,7 @@ const RoomsPage: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
         </div>
       </div>
 

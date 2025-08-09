@@ -24,6 +24,8 @@ export interface SearchFilters {
   checkOut: string
   guests: number
   priceRange: [number, number]
+  minPrice: number
+  maxPrice: number
   roomType: string
   amenities: string[]
 }
@@ -38,6 +40,19 @@ export interface BookingData {
     name: string
     email: string
     phone: string
+  }
+}
+
+export interface PartialBookingData {
+  roomId?: string
+  checkIn?: string
+  checkOut?: string
+  guests?: number
+  totalPrice?: number
+  guestInfo?: {
+    name?: string
+    email?: string
+    phone?: string
   }
 }
 

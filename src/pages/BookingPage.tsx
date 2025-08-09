@@ -12,14 +12,14 @@ import { Badge } from "../components/ui/badge"
 import { useRoom } from "../hooks/useRooms"
 import { bookingsApi } from "../lib/api"
 import { formatPrice } from "../lib/utils"
-import type { BookingData } from "../lib/types"
+import type { PartialBookingData } from "../lib/types"
 
 const BookingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { room, loading, error } = useRoom(id || "")
 
-  const [bookingData, setBookingData] = useState<Partial<BookingData>>({
+  const [bookingData, setBookingData] = useState<PartialBookingData>({
     checkIn: "",
     checkOut: "",
     guests: 1,
@@ -77,9 +77,9 @@ const BookingPage: React.FC = () => {
         checkOut: bookingData.checkOut!,
         guests: bookingData.guests!,
         guestInfo: {
-          name: bookingData.guestInfo!.name,
-          email: bookingData.guestInfo!.email,
-          phone: bookingData.guestInfo!.phone,
+          name: bookingData.guestInfo!.name!,
+          email: bookingData.guestInfo!.email!,
+          phone: bookingData.guestInfo!.phone!,
         }
       }
 

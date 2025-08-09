@@ -24,6 +24,8 @@ const HeroSearch: React.FC<HeroSearchProps> = ({ onSearch }) => {
     onSearch({
       ...searchData,
       priceRange: [0, 1000],
+      minPrice: 0,
+      maxPrice: 1000,
       roomType: "",
       amenities: [],
     })

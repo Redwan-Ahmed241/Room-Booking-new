@@ -3,12 +3,7 @@
 
 const API_BASE_URL = "https://room-booking-pjo6.onrender.com/api"
 
-// API response types
-interface ApiResponse<T> {
-  data: T
-  success: boolean
-  message?: string
-}
+
 
 // Auth response types
 interface LoginResponse {
