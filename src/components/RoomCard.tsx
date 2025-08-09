@@ -36,7 +36,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
             <img
               src={room.images[currentImageIndex] || "/placeholder.svg"}
               alt={room.name}
-              className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-200"
+              className="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-200"
             />
 
             {/* Image Navigation */}
@@ -44,17 +44,17 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 md:p-1 opacity-0 group-hover:opacity-100 transition-opacity touch-manipulation"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 md:p-1 opacity-0 group-hover:opacity-100 transition-opacity touch-manipulation"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -79,7 +79,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-3 right-3 bg-white/80 hover:bg-white rounded-full p-2"
+          className="absolute top-2 md:top-3 right-2 md:right-3 bg-white/80 hover:bg-white rounded-full p-1.5 md:p-2 w-8 h-8 md:w-auto md:h-auto"
           onClick={(e) => {
             e.preventDefault()
             setIsFavorite(!isFavorite)
@@ -89,43 +89,48 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
         </Button>
 
         {/* Room Type Badge */}
-        <Badge variant="secondary" className="absolute top-3 left-3 bg-white/90 text-gray-700 capitalize">
+        <Badge variant="secondary" className="absolute top-2 md:top-3 left-2 md:left-3 bg-white/90 text-gray-700 capitalize text-xs">
           {room.type}
         </Badge>
       </div>
 
-      <CardContent className="p-4">
+      <CardContent className="p-3 md:p-4">
         <Link to={`/booking/${room.id}`}>
           <div className="flex items-start justify-between mb-2">
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 group-hover:text-pink-600 transition-colors line-clamp-1">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-gray-900 group-hover:text-pink-600 transition-colors line-clamp-2 text-sm md:text-base">
                 {room.name}
               </h3>
-              <div className="flex items-center text-sm text-gray-500 mt-1">
-                <MapPin className="w-3 h-3 mr-1" />
-                {room.location}
+              <div className="flex items-center text-xs md:text-sm text-gray-500 mt-1">
+                <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate">{room.location}</span>
               </div>
             </div>
-            <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-sm font-medium">{room.rating}</span>
-              <span className="text-sm text-gray-500">({room.reviews})</span>
+            <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+              <Star className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 fill-current" />
+              <span className="text-xs md:text-sm font-medium">{room.rating}</span>
+              <span className="text-xs text-gray-500 hidden sm:inline">({room.reviews})</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <div className="grid grid-cols-2 md:flex md:items-center md:justify-between text-xs md:text-sm text-gray-600 mb-3 gap-1 md:gap-0">
             <span>{room.maxGuests} guests</span>
             <span>{room.bedrooms} bed</span>
             <span>{room.bathrooms} bath</span>
-            <span>{room.size}m²</span>
+            <span className="hidden md:inline">{room.size}m²</span>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-baseline space-x-1">
-              <span className="text-lg font-bold text-gray-900">{formatPrice(room.price)}</span>
-              <span className="text-sm text-gray-500">night</span>
+              <span className="text-base md:text-lg font-bold text-gray-900">{formatPrice(room.price)}</span>
+              <span className="text-xs md:text-sm text-gray-500">night</span>
             </div>
-            <Badge variant={room.available ? "default" : "secondary"}>{room.available ? "Available" : "Booked"}</Badge>
+            <Badge
+              variant={room.available ? "default" : "secondary"}
+              className="text-xs"
+            >
+              {room.available ? "Available" : "Booked"}
+            </Badge>
           </div>
         </Link>
       </CardContent>

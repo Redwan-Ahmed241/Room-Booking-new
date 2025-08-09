@@ -91,10 +91,14 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">Find your perfect stay</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Discover amazing places to stay around the world</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 mb-3 md:mb-4 leading-tight">
+              Find your perfect stay
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+              Discover amazing places to stay around the world
+            </p>
           </div>
 
           <HeroSearch onSearch={handleSearch} />
@@ -102,16 +106,21 @@ const HomePage: React.FC = () => {
       </div>
       {/* Mini Villa Navbar */}
       {villaNames.length > 0 && (
-        <div className="flex space-x-4 justify-center py-4 bg-white border-b-0" style={{ borderBottom: '1px solid transparent' }}>
-          {villaNames.map((villa) => (
-            <button
-              key={villa}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors ${selectedVilla === villa ? "bg-pink-500 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-pink-100"}`}
-              onClick={() => setSelectedVilla(villa)}
-            >
-              {villa}
-            </button>
-          ))}
+        <div className="bg-white border-b border-gray-100 py-3 md:py-4 overflow-x-auto">
+          <div className="flex space-x-3 md:space-x-4 justify-start md:justify-center px-4 md:px-0 min-w-max md:min-w-0">
+            {villaNames.map((villa) => (
+              <button
+                key={villa}
+                className={`px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold text-sm md:text-base transition-colors whitespace-nowrap flex-shrink-0 ${selectedVilla === villa
+                    ? "bg-pink-500 text-white shadow-md"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-pink-50 hover:border-pink-200"
+                  }`}
+                onClick={() => setSelectedVilla(villa)}
+              >
+                {villa}
+              </button>
+            ))}
+          </div>
         </div>
       )}
       {/* Filters */}
@@ -124,122 +133,118 @@ const HomePage: React.FC = () => {
 
 
       {/* Results */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">{filteredRooms.length} stays found</h2>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 md:mb-6 gap-2">
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-900">
+            {filteredRooms.length} stays found
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {filteredRooms.map((room) => (
             <RoomCard key={room.id} room={room} />
           ))}
         </div>
 
         {filteredRooms.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
-            <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
+          <div className="text-center py-8 md:py-12">
+            <p className="text-gray-500 text-base md:text-lg">No rooms found matching your criteria.</p>
+            <p className="text-gray-400 mt-2 text-sm md:text-base">Try adjusting your filters or search terms.</p>
           </div>
         )}
       </div>
 
-      {/* Featured Accommodations Section (from app/page.tsx) */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Featured Accommodations</h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+      {/* Featured Accommodations Section */}
+      <section className="py-12 md:py-16 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">Featured Accommodations</h2>
+          <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
             Discover our most popular rooms with exceptional ratings and stunning amenities
           </p>
         </div>
-        {/* You can use rooms.filter(...) or a separate featuredRooms state if you want to show only featured */}
         {filteredRooms.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredRooms.slice(0, 6).map((room) => (
               <RoomCard key={room.id} room={room} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-8 md:py-12">
             <p className="text-slate-600 mb-4">No rooms available at the moment.</p>
             <p className="text-sm text-slate-500">Please check back later or contact us for availability.</p>
           </div>
         )}
       </section>
 
-      {/* Stats Section (from app/page.tsx) */}
-      <section className="py-16 bg-white">
+      {/* Stats Section */}
+      <section className="py-12 md:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Example stat cards, you can adjust values as needed */}
-            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
-              <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                {/* MapPin icon placeholder */}
-                <span role="img" aria-label="MapPin">📍</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <span role="img" aria-label="MapPin" className="text-lg md:text-xl">📍</span>
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">1+</h3>
-              <p className="text-slate-600">Premium Villas</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">1+</h3>
+              <p className="text-slate-600 text-sm md:text-base">Premium Villas</p>
             </div>
-            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
-              <div className="w-12 h-12 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                {/* Users icon placeholder */}
-                <span role="img" aria-label="Users">👥</span>
+            <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <span role="img" aria-label="Users" className="text-lg md:text-xl">👥</span>
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">9+</h3>
-              <p className="text-slate-600">Luxury Rooms</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">9+</h3>
+              <p className="text-slate-600 text-sm md:text-base">Luxury Rooms</p>
             </div>
-            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                {/* Star icon placeholder */}
-                <span role="img" aria-label="Star">⭐</span>
+            <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <span role="img" aria-label="Star" className="text-lg md:text-xl">⭐</span>
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">4.8</h3>
-              <p className="text-slate-600">Average Rating</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">4.8</h3>
+              <p className="text-slate-600 text-sm md:text-base">Average Rating</p>
             </div>
-            <div className="text-center border-0 shadow-sm p-6 rounded-lg bg-white">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                {/* Award icon placeholder */}
-                <span role="img" aria-label="Award">🏆</span>
+            <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <span role="img" aria-label="Award" className="text-lg md:text-xl">🏆</span>
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">100%</h3>
-              <p className="text-slate-600">Satisfaction Rate</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">100%</h3>
+              <p className="text-slate-600 text-sm md:text-base">Satisfaction Rate</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us Section (from app/page.tsx) */}
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Why Choose VillaEase?</h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+      {/* Why Choose Us Section */}
+      <section className="py-12 md:py-16 px-4 max-w-7xl mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">Why Choose VillaEase?</h2>
+          <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
             Experience luxury, comfort, and exceptional service in every stay
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span role="img" aria-label="Star">⭐</span>
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+              <span role="img" aria-label="Star" className="text-xl md:text-2xl">⭐</span>
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-4">Premium Quality</h3>
-            <p className="text-slate-600">
+            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">Premium Quality</h3>
+            <p className="text-slate-600 text-sm md:text-base leading-relaxed">
               Every room is carefully selected and maintained to ensure the highest standards of luxury and comfort.
             </p>
           </div>
           <div className="text-center">
-            <div className="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span role="img" aria-label="Users">👥</span>
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+              <span role="img" aria-label="Users" className="text-xl md:text-2xl">👥</span>
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-4">24/7 Support</h3>
-            <p className="text-slate-600">
+            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">24/7 Support</h3>
+            <p className="text-slate-600 text-sm md:text-base leading-relaxed">
               Our dedicated team is available around the clock to ensure your stay is perfect from start to finish.
             </p>
           </div>
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span role="img" aria-label="MapPin">📍</span>
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+              <span role="img" aria-label="MapPin" className="text-xl md:text-2xl">📍</span>
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-4">Prime Locations</h3>
-            <p className="text-slate-600">
+            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">Prime Locations</h3>
+            <p className="text-slate-600 text-sm md:text-base leading-relaxed">
               All our villas are located in the most desirable destinations with easy access to attractions and amenities.
             </p>
           </div>

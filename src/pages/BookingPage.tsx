@@ -124,43 +124,47 @@ const BookingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Room Details */}
-          <div>
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-              <img src={room.images?.[0] || "/placeholder.svg"} alt={room.name} className="w-full h-64 object-cover" />
-              <div className="p-6">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">{room.name}</h1>
-                <div className="flex items-center text-gray-600 mb-4">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  <span>{room.location}</span>
+          <div className="order-2 lg:order-1">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4 md:mb-6">
+              <img
+                src={room.images?.[0] || "/placeholder.svg"}
+                alt={room.name}
+                className="w-full h-48 md:h-64 object-cover"
+              />
+              <div className="p-4 md:p-6">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{room.name}</h1>
+                <div className="flex items-center text-gray-600 mb-3 md:mb-4">
+                  <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span className="text-sm md:text-base">{room.location}</span>
                 </div>
 
-                <div className="flex items-center mb-4">
+                <div className="flex items-center mb-3 md:mb-4">
                   <Star className="h-4 w-4 text-yellow-500 mr-1" />
-                  <span className="font-medium">{room.rating}</span>
-                  <span className="text-gray-500 ml-1">({room.reviews} reviews)</span>
+                  <span className="font-medium text-sm md:text-base">{room.rating}</span>
+                  <span className="text-gray-500 ml-1 text-sm md:text-base">({room.reviews} reviews)</span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
                   <div className="text-center">
-                    <Users className="h-5 w-5 mx-auto mb-1 text-gray-600" />
-                    <p className="text-sm text-gray-600">{room.maxGuests} guests</p>
+                    <Users className="h-4 w-4 md:h-5 md:w-5 mx-auto mb-1 text-gray-600" />
+                    <p className="text-xs md:text-sm text-gray-600">{room.maxGuests} guests</p>
                   </div>
                   <div className="text-center">
-                    <span className="text-sm text-gray-600">{room.bedrooms} bedrooms</span>
+                    <p className="text-xs md:text-sm text-gray-600 mt-5">{room.bedrooms} bedrooms</p>
                   </div>
                   <div className="text-center">
-                    <span className="text-sm text-gray-600">{room.bathrooms} bathrooms</span>
+                    <p className="text-xs md:text-sm text-gray-600 mt-5">{room.bathrooms} bathrooms</p>
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">Amenities</h3>
-                  <div className="flex flex-wrap gap-2">
+                <div className="mb-4 md:mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2 md:mb-3 text-sm md:text-base">Amenities</h3>
+                  <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {room.amenities?.map((amenity) => (
-                      <Badge key={amenity} variant="outline">
+                      <Badge key={amenity} variant="outline" className="text-xs">
                         {amenity}
                       </Badge>
                     ))}
@@ -168,27 +172,27 @@ const BookingPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Description</h3>
-                  <p className="text-gray-600">{room.description}</p>
+                  <h3 className="font-semibold text-gray-900 mb-2 md:mb-3 text-sm md:text-base">Description</h3>
+                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">{room.description}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Booking Form */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Book Your Stay</span>
-                  <span className="text-2xl font-bold text-pink-500">{formatPrice(room.price)}/night</span>
+          <div className="order-1 lg:order-2">
+            <Card className="sticky top-4">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <span className="text-lg md:text-xl">Book Your Stay</span>
+                  <span className="text-xl md:text-2xl font-bold text-pink-500">{formatPrice(room.price)}/night</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div>
-                      <Label htmlFor="checkIn">Check-in</Label>
+                      <Label htmlFor="checkIn" className="text-sm md:text-base">Check-in</Label>
                       <Input
                         id="checkIn"
                         type="date"
@@ -196,10 +200,11 @@ const BookingPage: React.FC = () => {
                         value={bookingData.checkIn}
                         onChange={(e) => handleInputChange("checkIn", e.target.value)}
                         min={new Date().toISOString().split("T")[0]}
+                        className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="checkOut">Check-out</Label>
+                      <Label htmlFor="checkOut" className="text-sm md:text-base">Check-out</Label>
                       <Input
                         id="checkOut"
                         type="date"
@@ -207,12 +212,13 @@ const BookingPage: React.FC = () => {
                         value={bookingData.checkOut}
                         onChange={(e) => handleInputChange("checkOut", e.target.value)}
                         min={bookingData.checkIn || new Date().toISOString().split("T")[0]}
+                        className="mt-1"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="guests">Guests</Label>
+                    <Label htmlFor="guests" className="text-sm md:text-base">Guests</Label>
                     <Input
                       id="guests"
                       type="number"
@@ -221,13 +227,14 @@ const BookingPage: React.FC = () => {
                       required
                       value={bookingData.guests}
                       onChange={(e) => handleInputChange("guests", Number.parseInt(e.target.value))}
+                      className="mt-1"
                     />
                   </div>
 
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-gray-900">Guest Information</h3>
+                  <div className="space-y-3 md:space-y-4">
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">Guest Information</h3>
                     <div>
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name" className="text-sm md:text-base">Full Name</Label>
                       <Input
                         id="name"
                         type="text"
@@ -235,10 +242,11 @@ const BookingPage: React.FC = () => {
                         value={bookingData.guestInfo?.name}
                         onChange={(e) => handleInputChange("guestInfo.name", e.target.value)}
                         placeholder="Enter your full name"
+                        className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="text-sm md:text-base">Email</Label>
                       <Input
                         id="email"
                         type="email"
@@ -246,10 +254,11 @@ const BookingPage: React.FC = () => {
                         value={bookingData.guestInfo?.email}
                         onChange={(e) => handleInputChange("guestInfo.email", e.target.value)}
                         placeholder="Enter your email"
+                        className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone" className="text-sm md:text-base">Phone</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -257,14 +266,15 @@ const BookingPage: React.FC = () => {
                         value={bookingData.guestInfo?.phone}
                         onChange={(e) => handleInputChange("guestInfo.phone", e.target.value)}
                         placeholder="Enter your phone number"
+                        className="mt-1"
                       />
                     </div>
                   </div>
 
                   {totalPrice > 0 && (
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span>
+                    <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                      <div className="flex justify-between items-center mb-2 text-sm md:text-base">
+                        <span className="text-gray-700">
                           {formatPrice(room.price)} x{" "}
                           {Math.ceil(
                             (new Date(bookingData.checkOut!).getTime() - new Date(bookingData.checkIn!).getTime()) /
@@ -272,12 +282,12 @@ const BookingPage: React.FC = () => {
                           )}{" "}
                           nights
                         </span>
-                        <span>{formatPrice(totalPrice)}</span>
+                        <span className="font-medium">{formatPrice(totalPrice)}</span>
                       </div>
-                      <hr className="my-2" />
-                      <div className="flex justify-between items-center font-semibold">
+                      <hr className="my-2 border-gray-200" />
+                      <div className="flex justify-between items-center font-semibold text-sm md:text-base">
                         <span>Total</span>
-                        <span className="text-pink-500">{formatPrice(totalPrice)}</span>
+                        <span className="text-pink-500 text-lg md:text-xl">{formatPrice(totalPrice)}</span>
                       </div>
                     </div>
                   )}
@@ -291,7 +301,7 @@ const BookingPage: React.FC = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting || totalPrice === 0}
-                    className="w-full bg-pink-500 hover:bg-pink-600"
+                    className="w-full bg-pink-500 hover:bg-pink-600 h-12 text-base font-medium"
                   >
                     {isSubmitting ? "Booking..." : "Book Now"}
                   </Button>

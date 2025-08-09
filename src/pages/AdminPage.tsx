@@ -207,13 +207,13 @@ const AdminPage: React.FC = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Total Rooms</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{totalRooms}</div>
+              <div className="text-xl md:text-2xl font-bold text-gray-900">{totalRooms}</div>
             </CardContent>
           </Card>
 
@@ -222,18 +222,18 @@ const AdminPage: React.FC = () => {
               <CardTitle className="text-sm font-medium text-gray-600">Available Rooms</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{availableRooms}</div>
-              <div className="text-sm text-gray-500">{totalRooms - availableRooms} unavailable</div>
+              <div className="text-xl md:text-2xl font-bold text-green-600">{availableRooms}</div>
+              <div className="text-xs md:text-sm text-gray-500">{totalRooms - availableRooms} unavailable</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="sm:col-span-2 lg:col-span-1">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">Average Price</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{formatPrice(averagePrice)}</div>
-              <div className="text-sm text-gray-500">per night</div>
+              <div className="text-xl md:text-2xl font-bold text-gray-900">{formatPrice(averagePrice)}</div>
+              <div className="text-xs md:text-sm text-gray-500">per night</div>
             </CardContent>
           </Card>
         </div>
@@ -417,10 +417,10 @@ const AdminPage: React.FC = () => {
           </Card>
         )}
 
-        {/* Rooms Table */}
+        {/* Rooms List - Mobile-First Design */}
         <Card>
           <CardHeader>
-            <CardTitle>All Rooms</CardTitle>
+            <CardTitle className="text-lg md:text-xl">All Rooms</CardTitle>
           </CardHeader>
           <CardContent>
             {rooms.length === 0 ? (
@@ -428,79 +428,141 @@ const AdminPage: React.FC = () => {
                 <p className="text-gray-500">No rooms found. Add your first room to get started.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4">Room</th>
-                      <th className="text-left py-3 px-4">Type</th>
-                      <th className="text-left py-3 px-4">Location</th>
-                      <th className="text-left py-3 px-4">Price</th>
-                      <th className="text-left py-3 px-4">Rating</th>
-                      <th className="text-left py-3 px-4">Status</th>
-                      <th className="text-left py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rooms.map((room) => (
-                      <tr key={room.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-3">
-                            <img
-                              src={room.images?.[0] || "/placeholder.svg"}
-                              alt={room.name}
-                              className="w-12 h-12 object-cover rounded-lg"
-                            />
-                            <div>
-                              <div className="font-medium text-gray-900">{room.name}</div>
-                              <div className="text-sm text-gray-500">
-                                {room.bedrooms} bed • {room.bathrooms} bath
-                              </div>
+              <>
+                {/* Mobile Card View */}
+                <div className="block md:hidden space-y-4">
+                  {rooms.map((room) => (
+                    <Card key={room.id} className="border border-gray-200">
+                      <CardContent className="p-4">
+                        <div className="flex items-start space-x-3 mb-3">
+                          <img
+                            src={room.images?.[0] || "/placeholder.svg"}
+                            alt={room.name}
+                            className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-900 truncate">{room.name}</h4>
+                            <p className="text-sm text-gray-500 mb-1">{room.location}</p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline" className="capitalize text-xs">
+                                {room.type}
+                              </Badge>
+                              <Badge variant={room.available ? "default" : "secondary"} className="text-xs">
+                                {room.available ? "Available" : "Unavailable"}
+                              </Badge>
                             </div>
                           </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge variant="outline" className="capitalize">
-                            {room.type}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-gray-600">{room.location}</td>
-                        <td className="py-3 px-4 font-medium">{formatPrice(room.price)}</td>
-                        <td className="py-3 px-4">
+                        </div>
+
+                        <div className="flex justify-between items-center mb-3 text-sm">
+                          <div className="font-medium text-lg">{formatPrice(room.price)}</div>
                           <div className="flex items-center space-x-1">
                             <span className="text-yellow-500">★</span>
                             <span>{room.rating}</span>
-                            <span className="text-gray-500 text-sm">({room.reviews})</span>
+                            <span className="text-gray-500">({room.reviews})</span>
                           </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge variant={room.available ? "default" : "secondary"}>
-                            {room.available ? "Available" : "Unavailable"}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
-                              {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => console.log('Edit room:', room.id)}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteRoom(room.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
+                        </div>
+
+                        <div className="text-xs text-gray-500 mb-3">
+                          {room.bedrooms} bed • {room.bathrooms} bath
+                        </div>
+
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
+                            {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => console.log('Edit room:', room.id)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteRoom(room.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4">Room</th>
+                        <th className="text-left py-3 px-4">Type</th>
+                        <th className="text-left py-3 px-4">Location</th>
+                        <th className="text-left py-3 px-4">Price</th>
+                        <th className="text-left py-3 px-4">Rating</th>
+                        <th className="text-left py-3 px-4">Status</th>
+                        <th className="text-left py-3 px-4">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {rooms.map((room) => (
+                        <tr key={room.id} className="border-b hover:bg-gray-50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={room.images?.[0] || "/placeholder.svg"}
+                                alt={room.name}
+                                className="w-12 h-12 object-cover rounded-lg"
+                              />
+                              <div>
+                                <div className="font-medium text-gray-900">{room.name}</div>
+                                <div className="text-sm text-gray-500">
+                                  {room.bedrooms} bed • {room.bathrooms} bath
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge variant="outline" className="capitalize">
+                              {room.type}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-4 text-gray-600">{room.location}</td>
+                          <td className="py-3 px-4 font-medium">{formatPrice(room.price)}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-1">
+                              <span className="text-yellow-500">★</span>
+                              <span>{room.rating}</span>
+                              <span className="text-gray-500 text-sm">({room.reviews})</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <Badge variant={room.available ? "default" : "secondary"}>
+                              {room.available ? "Available" : "Unavailable"}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-2">
+                              <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
+                                {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => console.log('Edit room:', room.id)}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteRoom(room.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
