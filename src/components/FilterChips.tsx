@@ -24,13 +24,7 @@ const FilterChips: React.FC<FilterChipsProps> = ({
     });
   };
 
-  const toggleAmenity = (amenity: string) => {
-    const newAmenities = filters.amenities.includes(amenity)
-      ? filters.amenities.filter((a) => a !== amenity)
-      : [...filters.amenities, amenity];
-
-    onFilterChange({ amenities: newAmenities });
-  };
+  // Amenities are now static, not filterable
 
   const clearAllFilters = () => {
     onFilterChange({
@@ -76,16 +70,15 @@ const FilterChips: React.FC<FilterChipsProps> = ({
 
       {/* Amenities */}
       <div>
-        <h4 className="text-sm font-medium text-gray-700 mb-2">Amenities</h4>
+        <h4 className="text-sm font-medium text-gray-700 mb-2">
+          Popular Amenities
+        </h4>
         <div className="flex flex-wrap gap-2">
-          {popularAmenities.slice(0, 8).map((amenity) => (
+          {popularAmenities.map((amenity) => (
             <Badge
               key={amenity}
-              variant={
-                filters.amenities.includes(amenity) ? "default" : "outline"
-              }
-              className="cursor-pointer hover:bg-gray-100"
-              onClick={() => toggleAmenity(amenity)}
+              variant="outline"
+              className="bg-white text-gray-700 border-gray-300"
             >
               {amenity}
             </Badge>

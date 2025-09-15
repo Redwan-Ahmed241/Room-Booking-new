@@ -9,7 +9,7 @@ export interface Room {
   amenities: string[]
   description: string
   location: string
-  maxGuests: number
+  max_guests: number
   bedrooms: number
   bathrooms: number
   size: number
