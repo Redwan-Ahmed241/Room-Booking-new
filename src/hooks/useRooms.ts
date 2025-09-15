@@ -11,46 +11,42 @@ export const useRooms = (filters?: Partial<SearchFilters>) => {
   const [error, setError] = useState<string | null>(null)
 
   const fetchRooms = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true)
-      setError(null)
-
-      // Try to fetch from API first, fallback to mock data
-      try {
-        const data = await roomsApi.getRooms(filters)
-        setRooms(data)
-      } catch (apiError) {
-        console.warn("API not available, using mock data:", apiError)
-        // Filter mock data based on filters
-        let filteredRooms = mockRooms
-
-        if (filters) {
-          filteredRooms = mockRooms.filter((room) => {
-            const matchesLocation =
-              !filters.location || room.location.toLowerCase().includes(filters.location.toLowerCase())
-            const matchesGuests = !filters.guests || room.maxGuests >= filters.guests
-            const matchesPrice =
-              (!filters.minPrice || room.price >= filters.minPrice) &&
-              (!filters.maxPrice || room.price <= filters.maxPrice)
-            const matchesType = !filters.roomType || room.type === filters.roomType
-            const matchesAmenities =
-              !filters.amenities?.length || filters.amenities.every((amenity) => room.amenities.includes(amenity))
-
-            return matchesLocation && matchesGuests && matchesPrice && matchesType && matchesAmenities
-          })
-        }
-
-        setRooms(filteredRooms)
+      // Try to fetch from API first
+      const data = await roomsApi.getRooms(filters);
+      // If data is not an array, fallback to mockRooms
+      if (Array.isArray(data)) {
+        setRooms(data);
+      } else if (Array.isArray(data?.data)) {
+        setRooms(data.data);
+      } else {
+        setRooms(mockRooms);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch rooms")
-      console.error("Error fetching rooms:", err)
-      // Fallback to mock data even on error
-      setRooms(mockRooms)
+    } catch (apiError) {
+      console.warn("API not available, using mock data:", apiError);
+      // Filter mock data based on filters
+      let filteredRooms = mockRooms;
+      if (filters) {
+        filteredRooms = mockRooms.filter((room) => {
+          const matchesLocation =
+            !filters.location || room.location.toLowerCase().includes(filters.location.toLowerCase());
+          const matchesGuests = !filters.guests || room.maxGuests >= filters.guests;
+          const matchesPrice =
+            (!filters.minPrice || room.price >= filters.minPrice) &&
+            (!filters.maxPrice || room.price <= filters.maxPrice);
+          const matchesType = !filters.roomType || room.type === filters.roomType;
+          const matchesAmenities =
+            !filters.amenities?.length || filters.amenities.every((amenity) => room.amenities.includes(amenity));
+          return matchesLocation && matchesGuests && matchesPrice && matchesType && matchesAmenities;
+        });
+      }
+      setRooms(filteredRooms);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchRooms()

@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect, useMemo } from "react"
-import HeroSearch from "../components/HeroSearch"
-import RoomCard from "../components/RoomCard"
-import FilterChips from "../components/FilterChips"
-import { useRooms } from "../hooks/useRooms"
-import type { SearchFilters } from "../lib/types"
+import type React from "react";
+import { useState, useEffect, useMemo } from "react";
+import HeroSearch from "../components/HeroSearch";
+import RoomCard from "../components/RoomCard";
+import FilterChips from "../components/FilterChips";
+import { useRooms } from "../hooks/useRooms";
+import { mockRooms } from "../lib/mockData";
+import type { SearchFilters } from "../lib/types";
 
 const HomePage: React.FC = () => {
   const [filters, setFilters] = useState<SearchFilters>({
@@ -19,9 +20,13 @@ const HomePage: React.FC = () => {
     maxPrice: 1000,
     roomType: "",
     amenities: [],
-  })
+  });
 
-  const { rooms, loading, error } = useRooms({
+  const {
+    rooms: rawRooms,
+    loading,
+    error,
+  } = useRooms({
     location: filters.location,
     checkIn: filters.checkIn,
     checkOut: filters.checkOut,
@@ -30,35 +35,40 @@ const HomePage: React.FC = () => {
     maxPrice: filters.maxPrice,
     roomType: filters.roomType,
     amenities: filters.amenities,
-  })
+  });
 
-  const [selectedVilla, setSelectedVilla] = useState<string>("")
+  // Always ensure rooms is an array
+  const rooms = Array.isArray(rawRooms) ? rawRooms : mockRooms;
+
+  const [selectedVilla, setSelectedVilla] = useState<string>("");
 
   const villaNames = useMemo(() => {
-    const villas = rooms.filter((room) => room.type === "villa")
+    const safeRooms = Array.isArray(rooms) ? rooms : [];
+    const villas = safeRooms.filter((room) => room.type === "villa");
     // Extract base villa name (before dash, or just first word(s))
-    const names = villas.map((room) => room.name.split(" - ")[0].trim())
-    return Array.from(new Set(names))
-  }, [rooms])
+    const names = villas.map((room) => room.name.split(" - ")[0].trim());
+    return Array.from(new Set(names));
+  }, [rooms]);
 
   useEffect(() => {
     if (villaNames.length > 0 && !selectedVilla) {
-      setSelectedVilla(villaNames[0])
+      setSelectedVilla(villaNames[0]);
     }
-  }, [villaNames, selectedVilla])
+  }, [villaNames, selectedVilla]);
 
   const filteredRooms = useMemo(() => {
-    if (!selectedVilla) return rooms
-    return rooms.filter((room) => room.name.startsWith(selectedVilla))
-  }, [rooms, selectedVilla])
+    const safeRooms = Array.isArray(rooms) ? rooms : [];
+    if (!selectedVilla) return safeRooms;
+    return safeRooms.filter((room) => room.name.startsWith(selectedVilla));
+  }, [rooms, selectedVilla]);
 
   const handleSearch = (searchFilters: SearchFilters) => {
-    setFilters(searchFilters)
-  }
+    setFilters(searchFilters);
+  };
 
   const handleFilterChange = (newFilters: Partial<SearchFilters>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }))
-  }
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+  };
 
   if (loading) {
     return (
@@ -68,7 +78,7 @@ const HomePage: React.FC = () => {
           <p className="text-gray-600">Loading rooms...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -84,7 +94,7 @@ const HomePage: React.FC = () => {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -111,10 +121,11 @@ const HomePage: React.FC = () => {
             {villaNames.map((villa) => (
               <button
                 key={villa}
-                className={`px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold text-sm md:text-base transition-colors whitespace-nowrap flex-shrink-0 ${selectedVilla === villa
+                className={`px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold text-sm md:text-base transition-colors whitespace-nowrap flex-shrink-0 ${
+                  selectedVilla === villa
                     ? "bg-pink-500 text-white shadow-md"
                     : "bg-white text-gray-700 border border-gray-300 hover:bg-pink-50 hover:border-pink-200"
-                  }`}
+                }`}
                 onClick={() => setSelectedVilla(villa)}
               >
                 {villa}
@@ -129,8 +140,6 @@ const HomePage: React.FC = () => {
           <FilterChips filters={filters} onFilterChange={handleFilterChange} />
         </div>
       </div>
-
-
 
       {/* Results */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
@@ -148,8 +157,12 @@ const HomePage: React.FC = () => {
 
         {filteredRooms.length === 0 && (
           <div className="text-center py-8 md:py-12">
-            <p className="text-gray-500 text-base md:text-lg">No rooms found matching your criteria.</p>
-            <p className="text-gray-400 mt-2 text-sm md:text-base">Try adjusting your filters or search terms.</p>
+            <p className="text-gray-500 text-base md:text-lg">
+              No rooms found matching your criteria.
+            </p>
+            <p className="text-gray-400 mt-2 text-sm md:text-base">
+              Try adjusting your filters or search terms.
+            </p>
           </div>
         )}
       </div>
@@ -157,9 +170,12 @@ const HomePage: React.FC = () => {
       {/* Featured Accommodations Section */}
       <section className="py-12 md:py-16 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">Featured Accommodations</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">
+            Featured Accommodations
+          </h2>
           <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
-            Discover our most popular rooms with exceptional ratings and stunning amenities
+            Discover our most popular rooms with exceptional ratings and
+            stunning amenities
           </p>
         </div>
         {filteredRooms.length > 0 ? (
@@ -170,8 +186,12 @@ const HomePage: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-8 md:py-12">
-            <p className="text-slate-600 mb-4">No rooms available at the moment.</p>
-            <p className="text-sm text-slate-500">Please check back later or contact us for availability.</p>
+            <p className="text-slate-600 mb-4">
+              No rooms available at the moment.
+            </p>
+            <p className="text-sm text-slate-500">
+              Please check back later or contact us for availability.
+            </p>
           </div>
         )}
       </section>
@@ -182,31 +202,71 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                <span role="img" aria-label="MapPin" className="text-lg md:text-xl">📍</span>
+                <span
+                  role="img"
+                  aria-label="MapPin"
+                  className="text-lg md:text-xl"
+                >
+                  📍
+                </span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">1+</h3>
-              <p className="text-slate-600 text-sm md:text-base">Premium Villas</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">
+                1+
+              </h3>
+              <p className="text-slate-600 text-sm md:text-base">
+                Premium Villas
+              </p>
             </div>
             <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                <span role="img" aria-label="Users" className="text-lg md:text-xl">👥</span>
+                <span
+                  role="img"
+                  aria-label="Users"
+                  className="text-lg md:text-xl"
+                >
+                  👥
+                </span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">9+</h3>
-              <p className="text-slate-600 text-sm md:text-base">Luxury Rooms</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">
+                9+
+              </h3>
+              <p className="text-slate-600 text-sm md:text-base">
+                Luxury Rooms
+              </p>
             </div>
             <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                <span role="img" aria-label="Star" className="text-lg md:text-xl">⭐</span>
+                <span
+                  role="img"
+                  aria-label="Star"
+                  className="text-lg md:text-xl"
+                >
+                  ⭐
+                </span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">4.8</h3>
-              <p className="text-slate-600 text-sm md:text-base">Average Rating</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">
+                4.8
+              </h3>
+              <p className="text-slate-600 text-sm md:text-base">
+                Average Rating
+              </p>
             </div>
             <div className="text-center bg-white border-0 shadow-sm p-4 md:p-6 rounded-lg">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                <span role="img" aria-label="Award" className="text-lg md:text-xl">🏆</span>
+                <span
+                  role="img"
+                  aria-label="Award"
+                  className="text-lg md:text-xl"
+                >
+                  🏆
+                </span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">100%</h3>
-              <p className="text-slate-600 text-sm md:text-base">Satisfaction Rate</p>
+              <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1 md:mb-2">
+                100%
+              </h3>
+              <p className="text-slate-600 text-sm md:text-base">
+                Satisfaction Rate
+              </p>
             </div>
           </div>
         </div>
@@ -215,7 +275,9 @@ const HomePage: React.FC = () => {
       {/* Why Choose Us Section */}
       <section className="py-12 md:py-16 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">Why Choose VillaEase?</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">
+            Why Choose VillaEase?
+          </h2>
           <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
             Experience luxury, comfort, and exceptional service in every stay
           </p>
@@ -223,35 +285,62 @@ const HomePage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8">
           <div className="text-center">
             <div className="w-12 h-12 md:w-16 md:h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-              <span role="img" aria-label="Star" className="text-xl md:text-2xl">⭐</span>
+              <span
+                role="img"
+                aria-label="Star"
+                className="text-xl md:text-2xl"
+              >
+                ⭐
+              </span>
             </div>
-            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">Premium Quality</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">
+              Premium Quality
+            </h3>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-              Every room is carefully selected and maintained to ensure the highest standards of luxury and comfort.
+              Every room is carefully selected and maintained to ensure the
+              highest standards of luxury and comfort.
             </p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-              <span role="img" aria-label="Users" className="text-xl md:text-2xl">👥</span>
+              <span
+                role="img"
+                aria-label="Users"
+                className="text-xl md:text-2xl"
+              >
+                👥
+              </span>
             </div>
-            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">24/7 Support</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">
+              24/7 Support
+            </h3>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-              Our dedicated team is available around the clock to ensure your stay is perfect from start to finish.
+              Our dedicated team is available around the clock to ensure your
+              stay is perfect from start to finish.
             </p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-              <span role="img" aria-label="MapPin" className="text-xl md:text-2xl">📍</span>
+              <span
+                role="img"
+                aria-label="MapPin"
+                className="text-xl md:text-2xl"
+              >
+                📍
+              </span>
             </div>
-            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">Prime Locations</h3>
+            <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-3 md:mb-4">
+              Prime Locations
+            </h3>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-              All our villas are located in the most desirable destinations with easy access to attractions and amenities.
+              All our villas are located in the most desirable destinations with
+              easy access to attractions and amenities.
             </p>
           </div>
         </div>
       </section>
     </div>
-  )
-}
+  );
+};
 
-export default HomePage
+export default HomePage;
