@@ -2,7 +2,7 @@
 
 # dependencies
 /node_modules
-
+invoice_generator.py
 # next.js
 /.next/
 /out/
