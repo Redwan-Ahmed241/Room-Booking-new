@@ -13,7 +13,13 @@ export const mockRooms: Room[] = [
       "/placeholder.svg?height=300&width=400&text=Ocean+View+Bedroom",
       "/placeholder.svg?height=300&width=400&text=Ocean+View+Bathroom",
     ],
-    amenities: ["Ocean View", "WiFi", "Air Conditioning", "Mini Bar", "Room Service"],
+    amenities: [
+      "Free parking",
+      "Fast free WiFi (480 Mbps)",
+      "Non-smoking rooms",
+      "Laundry",
+      "Tea/coffee maker in all rooms"
+    ],
     description: "Luxurious suite with breathtaking ocean views and premium amenities.",
     location: "Maldives",
     maxGuests: 2,
@@ -34,7 +40,13 @@ export const mockRooms: Room[] = [
       "/placeholder.svg?height=300&width=400&text=Garden+View",
       "/placeholder.svg?height=300&width=400&text=Garden+Bathroom",
     ],
-    amenities: ["Garden View", "WiFi", "Air Conditioning", "Balcony"],
+    amenities: [
+      "Free parking",
+      "Fast free WiFi (480 Mbps)",
+      "Non-smoking rooms",
+      "Laundry",
+      "Tea/coffee maker in all rooms"
+    ],
     description: "Comfortable room overlooking beautiful tropical gardens.",
     location: "Bali",
     maxGuests: 2,
@@ -55,7 +67,13 @@ export const mockRooms: Room[] = [
       "/placeholder.svg?height=300&width=400&text=Family+Living+Room",
       "/placeholder.svg?height=300&width=400&text=Family+Bedroom",
     ],
-    amenities: ["WiFi", "Air Conditioning", "Kitchen", "Living Area", "Balcony"],
+    amenities: [
+      "Free parking",
+      "Fast free WiFi (480 Mbps)",
+      "Non-smoking rooms",
+      "Laundry",
+      "Tea/coffee maker in all rooms"
+    ],
     description: "Spacious suite perfect for families with separate living area.",
     location: "Thailand",
     maxGuests: 4,
@@ -76,7 +94,13 @@ export const mockRooms: Room[] = [
       "/placeholder.svg?height=300&width=400&text=Villa+Pool",
       "/placeholder.svg?height=300&width=400&text=Villa+Interior",
     ],
-    amenities: ["Private Pool", "WiFi", "Air Conditioning", "Kitchen", "Butler Service", "Ocean View"],
+    amenities: [
+      "Free parking",
+      "Fast free WiFi (480 Mbps)",
+      "Non-smoking rooms",
+      "Laundry",
+      "Tea/coffee maker in all rooms"
+    ],
     description: "Ultimate luxury villa with private pool and dedicated butler service.",
     location: "Seychelles",
     maxGuests: 6,
@@ -97,7 +121,13 @@ export const mockRooms: Room[] = [
       "/placeholder.svg?height=300&width=400&text=Cottage+Interior",
       "/placeholder.svg?height=300&width=400&text=Beach+View",
     ],
-    amenities: ["Beach Access", "WiFi", "Air Conditioning", "Kitchenette"],
+    amenities: [
+      "Free parking",
+      "Fast free WiFi (480 Mbps)",
+      "Non-smoking rooms",
+      "Laundry",
+      "Tea/coffee maker in all rooms"
+    ],
     description: "Charming cottage just steps away from pristine white sand beach.",
     location: "Mauritius",
     maxGuests: 2,
@@ -118,7 +148,13 @@ export const mockRooms: Room[] = [
       "/placeholder.svg?height=300&width=400&text=Mountain+View",
       "/placeholder.svg?height=300&width=400&text=Lodge+Interior",
     ],
-    amenities: ["Mountain View", "WiFi", "Fireplace", "Balcony", "Hiking Access"],
+    amenities: [
+      "Free parking",
+      "Fast free WiFi (480 Mbps)",
+      "Non-smoking rooms",
+      "Laundry",
+      "Tea/coffee maker in all rooms"
+    ],
     description: "Rustic lodge with stunning mountain views and hiking trail access.",
     location: "Nepal",
     maxGuests: 3,
@@ -130,23 +166,9 @@ export const mockRooms: Room[] = [
 ]
 
 export const popularAmenities = [
-  "WiFi",
-  "Air Conditioning",
-  "Ocean View",
-  "Pool",
-  "Kitchen",
-  "Balcony",
-  "Room Service",
-  "Mini Bar",
-  "Spa Access",
-  "Gym Access",
-  "Beach Access",
-  "Mountain View",
-  "Garden View",
-  "Private Pool",
-  "Butler Service",
-  "Fireplace",
-  "Kitchenette",
-  "Living Area",
-  "Hiking Access",
+  "Free parking",
+  "Fast free WiFi (480 Mbps)",
+  "Non-smoking rooms",
+  "Laundry",
+  "Tea/coffee maker in all rooms"
 ]
