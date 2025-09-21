@@ -8,11 +8,42 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "../components/ui/card";
 import Logo from "../components/Logo";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+
+const PasswordInput: React.FC<{
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showPassword: boolean;
+  setShowPassword: (show: boolean) => void;
+}> = ({ value, onChange, showPassword, setShowPassword }) => (
+  <div className="relative mt-1">
+    <Input
+      id="password"
+      type={showPassword ? "text" : "password"}
+      required
+      value={value}
+      onChange={onChange}
+      placeholder="Enter your password"
+      autoComplete="current-password"
+      className="pr-10 w-full"
+    />
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      aria-label={showPassword ? "Hide password" : "Show password"}
+      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+    >
+      {showPassword ? (
+        <EyeOff className="h-4 w-4 text-gray-400" />
+      ) : (
+        <Eye className="h-4 w-4 text-gray-400" />
+      )}
+    </button>
+  </div>
+);
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -20,6 +51,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,26 +64,27 @@ const LoginPage: React.FC = () => {
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
-      window.location.href = "/";
+      navigate("/");
     } catch (err: any) {
-      setError(err.message || "Invalid username or password");
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          "Invalid username or password"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center mb-6">
-          <Logo />
-        </div>
-        <h2 className="text-center text-3xl font-bold text-gray-900">Login</h2>
-      </div>
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:w-full sm:max-w-md">
+        <Card className="shadow-lg">
+          <div className="flex flex-col items-center mb-6">
+            <Logo className="h-16 w-16 mb-2" />
+            <h1 className="text-xl font-bold">Welcome Back</h1>
+          </div>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
             <CardDescription className="text-gray-600">
               Enter your credentials to continue
             </CardDescription>
@@ -66,33 +99,26 @@ const LoginPage: React.FC = () => {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="mt-1"
+                  className="mt-1 w-full"
                   placeholder="Enter your username"
+                  autoComplete="username"
                 />
               </div>
               <div>
                 <Label htmlFor="password">Password</Label>
-                <div className="relative mt-1">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  showPassword={showPassword}
+                  setShowPassword={setShowPassword}
+                />
+                <div className="mt-2 text-center">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-pink-500 hover:underline"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </button>
+                    Forgot Password?
+                  </Link>
                 </div>
               </div>
               {error && (
@@ -103,8 +129,11 @@ const LoginPage: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-pink-500 hover:bg-pink-600"
+                className="w-full bg-pink-500 hover:bg-pink-600 flex items-center justify-center"
               >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>

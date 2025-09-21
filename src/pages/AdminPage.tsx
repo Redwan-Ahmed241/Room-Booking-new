@@ -1,23 +1,28 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Plus, Edit, Trash2, Eye, EyeOff, Save, X } from "lucide-react"
-import { Button } from "../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { Badge } from "../components/ui/badge"
-import { Textarea } from "../components/ui/textarea"
-import { roomsApi } from "../lib/api"
-import { formatPrice } from "../lib/utils"
-import type { Room } from "../lib/types"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Save, X } from "lucide-react";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
+import { Textarea } from "../components/ui/textarea";
+import { roomsApi } from "../lib/api";
+import { formatPrice } from "../lib/utils";
+import type { Room } from "../lib/types";
 
 const AdminPage: React.FC = () => {
-  const [rooms, setRooms] = useState<Room[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isAddingRoom, setIsAddingRoom] = useState(false)
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAddingRoom, setIsAddingRoom] = useState(false);
 
   const [newRoom, setNewRoom] = useState<Partial<Room>>({
     name: "",
@@ -29,31 +34,31 @@ const AdminPage: React.FC = () => {
     amenities: [],
     description: "",
     location: "",
-    maxGuests: 1,
+    max_guests: 1,
     bedrooms: 1,
     bathrooms: 1,
     size: 30,
     available: true,
-  })
+  });
 
   // Fetch rooms on component mount
   useEffect(() => {
-    fetchRooms()
-  }, [])
+    fetchRooms();
+  }, []);
 
   const fetchRooms = async () => {
     try {
-      setIsLoading(true)
-      setError(null)
-      const response = await roomsApi.getRooms()
-      setRooms(response.data || response)
+      setIsLoading(true);
+      setError(null);
+      const response = await roomsApi.getRooms();
+      setRooms(response.data || response);
     } catch (err: any) {
-      setError(err.message || "Failed to fetch rooms")
-      console.error("Error fetching rooms:", err)
+      setError(err.message || "Failed to fetch rooms");
+      console.error("Error fetching rooms:", err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleAddRoom = async () => {
     if (newRoom.name && newRoom.location && newRoom.price) {
@@ -64,19 +69,21 @@ const AdminPage: React.FC = () => {
           price: newRoom.price,
           rating: newRoom.rating || 4.5,
           reviews: newRoom.reviews || 0,
-          images: newRoom.images?.filter((img) => img.trim()) || ["/placeholder.svg"],
+          images: newRoom.images?.filter((img) => img.trim()) || [
+            "/placeholder.svg",
+          ],
           amenities: newRoom.amenities || [],
           description: newRoom.description || "",
           location: newRoom.location,
-          maxGuests: newRoom.maxGuests || 1,
+          maxGuests: newRoom.max_guests || 1,
           bedrooms: newRoom.bedrooms || 1,
           bathrooms: newRoom.bathrooms || 1,
           size: newRoom.size || 30,
           available: newRoom.available ?? true,
-        }
+        };
 
-        await roomsApi.createRoom(roomData)
-        await fetchRooms() // Refresh the list
+        await roomsApi.createRoom(roomData);
+        await fetchRooms(); // Refresh the list
 
         // Reset form
         setNewRoom({
@@ -89,87 +96,90 @@ const AdminPage: React.FC = () => {
           amenities: [],
           description: "",
           location: "",
-          maxGuests: 1,
+          max_guests: 1,
           bedrooms: 1,
           bathrooms: 1,
           size: 30,
           available: true,
-        })
-        setIsAddingRoom(false)
+        });
+        setIsAddingRoom(false);
       } catch (err: any) {
-        setError(err.message || "Failed to create room")
-        console.error("Error creating room:", err)
+        setError(err.message || "Failed to create room");
+        console.error("Error creating room:", err);
       }
     }
-  }
+  };
 
   const handleDeleteRoom = async (id: string) => {
     if (confirm("Are you sure you want to delete this room?")) {
       try {
-        await roomsApi.deleteRoom(id)
-        await fetchRooms() // Refresh the list
+        await roomsApi.deleteRoom(id);
+        await fetchRooms(); // Refresh the list
       } catch (err: any) {
-        setError(err.message || "Failed to delete room")
-        console.error("Error deleting room:", err)
+        setError(err.message || "Failed to delete room");
+        console.error("Error deleting room:", err);
       }
     }
-  }
+  };
 
   const toggleAvailability = async (id: string) => {
     try {
-      const room = rooms.find(r => r.id === id)
+      const room = rooms.find((r) => r.id === id);
       if (room) {
-        await roomsApi.updateRoom(id, { available: !room.available })
-        await fetchRooms() // Refresh the list
+        await roomsApi.updateRoom(id, { available: !room.available });
+        await fetchRooms(); // Refresh the list
       }
     } catch (err: any) {
-      setError(err.message || "Failed to update room availability")
-      console.error("Error updating room:", err)
+      setError(err.message || "Failed to update room availability");
+      console.error("Error updating room:", err);
     }
-  }
+  };
 
   const addAmenity = (amenity: string) => {
     if (!newRoom.amenities?.includes(amenity)) {
       setNewRoom({
         ...newRoom,
         amenities: [...(newRoom.amenities || []), amenity],
-      })
+      });
     }
-  }
+  };
 
   const removeAmenity = (amenity: string) => {
     setNewRoom({
       ...newRoom,
       amenities: newRoom.amenities?.filter((a) => a !== amenity) || [],
-    })
-  }
+    });
+  };
 
   const addImageField = () => {
     setNewRoom({
       ...newRoom,
       images: [...(newRoom.images || []), ""],
-    })
-  }
+    });
+  };
 
   const updateImage = (index: number, value: string) => {
-    const updatedImages = [...(newRoom.images || [])]
-    updatedImages[index] = value
+    const updatedImages = [...(newRoom.images || [])];
+    updatedImages[index] = value;
     setNewRoom({
       ...newRoom,
       images: updatedImages,
-    })
-  }
+    });
+  };
 
   const removeImage = (index: number) => {
     setNewRoom({
       ...newRoom,
       images: newRoom.images?.filter((_, i) => i !== index) || [],
-    })
-  }
+    });
+  };
 
-  const totalRooms = rooms.length
-  const availableRooms = rooms.filter((room) => room.available).length
-  const averagePrice = rooms.length > 0 ? rooms.reduce((sum, room) => sum + room.price, 0) / rooms.length : 0
+  const totalRooms = rooms.length;
+  const availableRooms = rooms.filter((room) => room.available).length;
+  const averagePrice =
+    rooms.length > 0
+      ? rooms.reduce((sum, room) => sum + room.price, 0) / rooms.length
+      : 0;
 
   if (isLoading) {
     return (
@@ -179,7 +189,7 @@ const AdminPage: React.FC = () => {
           <p className="mt-4 text-gray-600">Loading rooms...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -187,7 +197,9 @@ const AdminPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Admin Dashboard
+          </h1>
           <p className="text-gray-600">Manage your rooms and villas</p>
         </div>
 
@@ -210,29 +222,43 @@ const AdminPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Rooms</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">
+                Total Rooms
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold text-gray-900">{totalRooms}</div>
+              <div className="text-xl md:text-2xl font-bold text-gray-900">
+                {totalRooms}
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Available Rooms</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">
+                Available Rooms
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold text-green-600">{availableRooms}</div>
-              <div className="text-xs md:text-sm text-gray-500">{totalRooms - availableRooms} unavailable</div>
+              <div className="text-xl md:text-2xl font-bold text-green-600">
+                {availableRooms}
+              </div>
+              <div className="text-xs md:text-sm text-gray-500">
+                {totalRooms - availableRooms} unavailable
+              </div>
             </CardContent>
           </Card>
 
           <Card className="sm:col-span-2 lg:col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Average Price</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600">
+                Average Price
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold text-gray-900">{formatPrice(averagePrice)}</div>
+              <div className="text-xl md:text-2xl font-bold text-gray-900">
+                {formatPrice(averagePrice)}
+              </div>
               <div className="text-xs md:text-sm text-gray-500">per night</div>
             </CardContent>
           </Card>
@@ -240,7 +266,10 @@ const AdminPage: React.FC = () => {
 
         {/* Add Room Button */}
         <div className="mb-6">
-          <Button onClick={() => setIsAddingRoom(true)} className="bg-pink-500 hover:bg-pink-600 text-white">
+          <Button
+            onClick={() => setIsAddingRoom(true)}
+            className="bg-pink-500 hover:bg-pink-600 text-white"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add New Room
           </Button>
@@ -252,7 +281,11 @@ const AdminPage: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 Add New Room
-                <Button variant="ghost" size="sm" onClick={() => setIsAddingRoom(false)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsAddingRoom(false)}
+                >
                   <X className="w-4 h-4" />
                 </Button>
               </CardTitle>
@@ -264,7 +297,9 @@ const AdminPage: React.FC = () => {
                   <Input
                     id="name"
                     value={newRoom.name}
-                    onChange={(e) => setNewRoom({ ...newRoom, name: e.target.value })}
+                    onChange={(e) =>
+                      setNewRoom({ ...newRoom, name: e.target.value })
+                    }
                     placeholder="Enter room name"
                   />
                 </div>
@@ -273,7 +308,9 @@ const AdminPage: React.FC = () => {
                   <Input
                     id="location"
                     value={newRoom.location}
-                    onChange={(e) => setNewRoom({ ...newRoom, location: e.target.value })}
+                    onChange={(e) =>
+                      setNewRoom({ ...newRoom, location: e.target.value })
+                    }
                     placeholder="Enter location"
                   />
                 </div>
@@ -285,7 +322,9 @@ const AdminPage: React.FC = () => {
                   <select
                     id="type"
                     value={newRoom.type}
-                    onChange={(e) => setNewRoom({ ...newRoom, type: e.target.value })}
+                    onChange={(e) =>
+                      setNewRoom({ ...newRoom, type: e.target.value })
+                    }
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >
                     <option value="room">Room</option>
@@ -299,7 +338,9 @@ const AdminPage: React.FC = () => {
                     id="price"
                     type="number"
                     value={newRoom.price}
-                    onChange={(e) => setNewRoom({ ...newRoom, price: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setNewRoom({ ...newRoom, price: Number(e.target.value) })
+                    }
                     placeholder="0"
                   />
                 </div>
@@ -308,8 +349,13 @@ const AdminPage: React.FC = () => {
                   <Input
                     id="maxGuests"
                     type="number"
-                    value={newRoom.maxGuests}
-                    onChange={(e) => setNewRoom({ ...newRoom, maxGuests: Number(e.target.value) })}
+                    value={newRoom.max_guests}
+                    onChange={(e) =>
+                      setNewRoom({
+                        ...newRoom,
+                        max_guests: Number(e.target.value),
+                      })
+                    }
                     min="1"
                   />
                 </div>
@@ -319,7 +365,12 @@ const AdminPage: React.FC = () => {
                     id="bedrooms"
                     type="number"
                     value={newRoom.bedrooms}
-                    onChange={(e) => setNewRoom({ ...newRoom, bedrooms: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setNewRoom({
+                        ...newRoom,
+                        bedrooms: Number(e.target.value),
+                      })
+                    }
                     min="1"
                   />
                 </div>
@@ -332,7 +383,12 @@ const AdminPage: React.FC = () => {
                     id="bathrooms"
                     type="number"
                     value={newRoom.bathrooms}
-                    onChange={(e) => setNewRoom({ ...newRoom, bathrooms: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setNewRoom({
+                        ...newRoom,
+                        bathrooms: Number(e.target.value),
+                      })
+                    }
                     min="1"
                   />
                 </div>
@@ -342,7 +398,9 @@ const AdminPage: React.FC = () => {
                     id="size"
                     type="number"
                     value={newRoom.size}
-                    onChange={(e) => setNewRoom({ ...newRoom, size: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setNewRoom({ ...newRoom, size: Number(e.target.value) })
+                    }
                     min="1"
                   />
                 </div>
@@ -353,7 +411,9 @@ const AdminPage: React.FC = () => {
                 <Textarea
                   id="description"
                   value={newRoom.description}
-                  onChange={(e) => setNewRoom({ ...newRoom, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewRoom({ ...newRoom, description: e.target.value })
+                  }
                   placeholder="Enter room description"
                   rows={3}
                 />
@@ -370,12 +430,22 @@ const AdminPage: React.FC = () => {
                         onChange={(e) => updateImage(index, e.target.value)}
                         placeholder="Enter image URL"
                       />
-                      <Button type="button" variant="outline" size="sm" onClick={() => removeImage(index)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeImage(index)}
+                      >
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
                   ))}
-                  <Button type="button" variant="outline" size="sm" onClick={addImageField}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addImageField}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Image
                   </Button>
@@ -386,13 +456,28 @@ const AdminPage: React.FC = () => {
               <div>
                 <Label>Amenities</Label>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {["WiFi", "Air Conditioning", "TV", "Kitchen", "Pool", "Gym", "Parking", "Breakfast"].map((amenity) => (
+                  {[
+                    "WiFi",
+                    "Air Conditioning",
+                    "TV",
+                    "Kitchen",
+                    "Pool",
+                    "Gym",
+                    "Parking",
+                    "Breakfast",
+                  ].map((amenity) => (
                     <Badge
                       key={amenity}
-                      variant={newRoom.amenities?.includes(amenity) ? "default" : "outline"}
+                      variant={
+                        newRoom.amenities?.includes(amenity)
+                          ? "default"
+                          : "outline"
+                      }
                       className="cursor-pointer"
                       onClick={() =>
-                        newRoom.amenities?.includes(amenity) ? removeAmenity(amenity) : addAmenity(amenity)
+                        newRoom.amenities?.includes(amenity)
+                          ? removeAmenity(amenity)
+                          : addAmenity(amenity)
                       }
                     >
                       {amenity}
@@ -400,16 +485,24 @@ const AdminPage: React.FC = () => {
                   ))}
                 </div>
                 {newRoom.amenities && newRoom.amenities.length > 0 && (
-                  <div className="text-sm text-gray-600">Selected: {newRoom.amenities.join(", ")}</div>
+                  <div className="text-sm text-gray-600">
+                    Selected: {newRoom.amenities.join(", ")}
+                  </div>
                 )}
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={handleAddRoom} className="bg-pink-500 hover:bg-pink-600">
+                <Button
+                  onClick={handleAddRoom}
+                  className="bg-pink-500 hover:bg-pink-600"
+                >
                   <Save className="w-4 h-4 mr-2" />
                   Save Room
                 </Button>
-                <Button variant="outline" onClick={() => setIsAddingRoom(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsAddingRoom(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -425,7 +518,9 @@ const AdminPage: React.FC = () => {
           <CardContent>
             {rooms.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500">No rooms found. Add your first room to get started.</p>
+                <p className="text-gray-500">
+                  No rooms found. Add your first room to get started.
+                </p>
               </div>
             ) : (
               <>
@@ -441,13 +536,25 @@ const AdminPage: React.FC = () => {
                             className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 truncate">{room.name}</h4>
-                            <p className="text-sm text-gray-500 mb-1">{room.location}</p>
+                            <h4 className="font-medium text-gray-900 truncate">
+                              {room.name}
+                            </h4>
+                            <p className="text-sm text-gray-500 mb-1">
+                              {room.location}
+                            </p>
                             <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline" className="capitalize text-xs">
+                              <Badge
+                                variant="outline"
+                                className="capitalize text-xs"
+                              >
                                 {room.type}
                               </Badge>
-                              <Badge variant={room.available ? "default" : "secondary"} className="text-xs">
+                              <Badge
+                                variant={
+                                  room.available ? "default" : "secondary"
+                                }
+                                className="text-xs"
+                              >
                                 {room.available ? "Available" : "Unavailable"}
                               </Badge>
                             </div>
@@ -455,11 +562,15 @@ const AdminPage: React.FC = () => {
                         </div>
 
                         <div className="flex justify-between items-center mb-3 text-sm">
-                          <div className="font-medium text-lg">{formatPrice(room.price)}</div>
+                          <div className="font-medium text-lg">
+                            {formatPrice(room.price)}
+                          </div>
                           <div className="flex items-center space-x-1">
                             <span className="text-yellow-500">★</span>
                             <span>{room.rating}</span>
-                            <span className="text-gray-500">({room.reviews})</span>
+                            <span className="text-gray-500">
+                              ({room.reviews})
+                            </span>
                           </div>
                         </div>
 
@@ -468,10 +579,22 @@ const AdminPage: React.FC = () => {
                         </div>
 
                         <div className="flex justify-end space-x-2">
-                          <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
-                            {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleAvailability(room.id)}
+                          >
+                            {room.available ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => console.log('Edit room:', room.id)}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => console.log("Edit room:", room.id)}
+                          >
                             <Edit className="w-4 h-4" />
                           </Button>
                           <Button
@@ -513,7 +636,9 @@ const AdminPage: React.FC = () => {
                                 className="w-12 h-12 object-cover rounded-lg"
                               />
                               <div>
-                                <div className="font-medium text-gray-900">{room.name}</div>
+                                <div className="font-medium text-gray-900">
+                                  {room.name}
+                                </div>
                                 <div className="text-sm text-gray-500">
                                   {room.bedrooms} bed • {room.bathrooms} bath
                                 </div>
@@ -525,26 +650,48 @@ const AdminPage: React.FC = () => {
                               {room.type}
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-gray-600">{room.location}</td>
-                          <td className="py-3 px-4 font-medium">{formatPrice(room.price)}</td>
+                          <td className="py-3 px-4 text-gray-600">
+                            {room.location}
+                          </td>
+                          <td className="py-3 px-4 font-medium">
+                            {formatPrice(room.price)}
+                          </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center space-x-1">
                               <span className="text-yellow-500">★</span>
                               <span>{room.rating}</span>
-                              <span className="text-gray-500 text-sm">({room.reviews})</span>
+                              <span className="text-gray-500 text-sm">
+                                ({room.reviews})
+                              </span>
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <Badge variant={room.available ? "default" : "secondary"}>
+                            <Badge
+                              variant={room.available ? "default" : "secondary"}
+                            >
                               {room.available ? "Available" : "Unavailable"}
                             </Badge>
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center space-x-2">
-                              <Button variant="ghost" size="sm" onClick={() => toggleAvailability(room.id)}>
-                                {room.available ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleAvailability(room.id)}
+                              >
+                                {room.available ? (
+                                  <EyeOff className="w-4 h-4" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => console.log('Edit room:', room.id)}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  console.log("Edit room:", room.id)
+                                }
+                              >
                                 <Edit className="w-4 h-4" />
                               </Button>
                               <Button
@@ -568,7 +715,7 @@ const AdminPage: React.FC = () => {
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdminPage
+export default AdminPage;
