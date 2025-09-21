@@ -155,6 +155,14 @@ const LoginPage: React.FC = () => {
                 Create Account
               </Link>
             </div>
+            <div className="mt-4 text-center">
+              <Button
+                onClick={() => navigate("/admin/login")}
+                className="inline-block px-6 py-2 text-sm font-medium text-white bg-pink-500 rounded-md hover:bg-pink-600"
+              >
+                Admin Login
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
