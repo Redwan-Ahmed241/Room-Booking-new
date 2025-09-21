@@ -1,107 +1,23 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Users, MapPin, Star } from "lucide-react";
-import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
+import { MapPin, Star, Users } from "lucide-react";
 import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import { useRoom } from "../hooks/useRooms";
-import { bookingsApi } from "../lib/api";
-import { formatPrice } from "../lib/utils";
-import type { PartialBookingData } from "../lib/types";
 
 const BookingPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { room, loading, error } = useRoom(id || "");
 
-  const [bookingData, setBookingData] = useState<PartialBookingData>({
-    checkIn: "",
-    checkOut: "",
-    guests: 1,
-    guestInfo: {
-      name: "",
-      email: "",
-      phone: "",
-    },
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const handleInputChange = (field: string, value: string | number) => {
-    if (field.startsWith("guestInfo.")) {
-      const guestField = field.split(".")[1];
-      setBookingData((prev) => ({
-        ...prev,
-        guestInfo: {
-          ...prev.guestInfo,
-          [guestField]: value,
-        },
-      }));
+  const handleBookNow = () => {
+    const isAuthenticated = localStorage.getItem("access");
+    if (isAuthenticated) {
+      navigate(`/booking/${id}`);
     } else {
-      setBookingData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    }
-  };
-
-  const calculateTotalPrice = () => {
-    if (!room || !bookingData.checkIn || !bookingData.checkOut) return 0;
-
-    const checkIn = new Date(bookingData.checkIn);
-    const checkOut = new Date(bookingData.checkOut);
-    const nights = Math.ceil(
-      (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    return nights > 0 ? nights * room.price : 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      if (!room || !id) {
-        throw new Error("Room information not available");
-      }
-
-      const bookingPayload = {
-        roomId: id,
-        checkIn: bookingData.checkIn!,
-        checkOut: bookingData.checkOut!,
-        guests: bookingData.guests!,
-        guestInfo: {
-          name: bookingData.guestInfo!.name!,
-          email: bookingData.guestInfo!.email!,
-          phone: bookingData.guestInfo!.phone!,
-        },
-      };
-
-      await bookingsApi.createBooking(bookingPayload);
-
-      // Show success message and redirect
-      alert("Booking submitted successfully!");
-      navigate("/");
-    } catch (err: any) {
-      setSubmitError(
-        err.message || "Failed to submit booking. Please try again."
-      );
-      console.error("Booking submission error:", err);
-    } finally {
-      setIsSubmitting(false);
+      navigate("/login");
     }
   };
 
@@ -131,8 +47,6 @@ const BookingPage: React.FC = () => {
       </div>
     );
   }
-
-  const totalPrice = calculateTotalPrice();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -213,180 +127,16 @@ const BookingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Booking Form */}
+          {/* Book Now Button */}
           <div className="order-1 lg:order-2">
-            <Card className="sticky top-4">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <span className="text-lg md:text-xl">Book Your Stay</span>
-                  <span className="text-xl md:text-2xl font-bold text-pink-500">
-                    {formatPrice(room.price)}/night
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-4 md:space-y-6"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                    <div>
-                      <Label htmlFor="checkIn" className="text-sm md:text-base">
-                        Check-in
-                      </Label>
-                      <Input
-                        id="checkIn"
-                        type="date"
-                        required
-                        value={bookingData.checkIn}
-                        onChange={(e) =>
-                          handleInputChange("checkIn", e.target.value)
-                        }
-                        min={new Date().toISOString().split("T")[0]}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor="checkOut"
-                        className="text-sm md:text-base"
-                      >
-                        Check-out
-                      </Label>
-                      <Input
-                        id="checkOut"
-                        type="date"
-                        required
-                        value={bookingData.checkOut}
-                        onChange={(e) =>
-                          handleInputChange("checkOut", e.target.value)
-                        }
-                        min={
-                          bookingData.checkIn ||
-                          new Date().toISOString().split("T")[0]
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="guests" className="text-sm md:text-base">
-                      Guests
-                    </Label>
-                    <Input
-                      id="guests"
-                      type="number"
-                      min="1"
-                      max={room.max_guests}
-                      required
-                      value={bookingData.guests}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "guests",
-                          Number.parseInt(e.target.value)
-                        )
-                      }
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div className="space-y-3 md:space-y-4">
-                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">
-                      Guest Information
-                    </h3>
-                    <div>
-                      <Label htmlFor="name" className="text-sm md:text-base">
-                        Full Name
-                      </Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        required
-                        value={bookingData.guestInfo?.name}
-                        onChange={(e) =>
-                          handleInputChange("guestInfo.name", e.target.value)
-                        }
-                        placeholder="Enter your full name"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="email" className="text-sm md:text-base">
-                        Email
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        required
-                        value={bookingData.guestInfo?.email}
-                        onChange={(e) =>
-                          handleInputChange("guestInfo.email", e.target.value)
-                        }
-                        placeholder="Enter your email"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone" className="text-sm md:text-base">
-                        Phone
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        required
-                        value={bookingData.guestInfo?.phone}
-                        onChange={(e) =>
-                          handleInputChange("guestInfo.phone", e.target.value)
-                        }
-                        placeholder="Enter your phone number"
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  {totalPrice > 0 && (
-                    <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
-                      <div className="flex justify-between items-center mb-2 text-sm md:text-base">
-                        <span className="text-gray-700">
-                          {formatPrice(room.price)} x{" "}
-                          {Math.ceil(
-                            (new Date(bookingData.checkOut!).getTime() -
-                              new Date(bookingData.checkIn!).getTime()) /
-                              (1000 * 60 * 60 * 24)
-                          )}{" "}
-                          nights
-                        </span>
-                        <span className="font-medium">
-                          {formatPrice(totalPrice)}
-                        </span>
-                      </div>
-                      <hr className="my-2 border-gray-200" />
-                      <div className="flex justify-between items-center font-semibold text-sm md:text-base">
-                        <span>Total</span>
-                        <span className="text-pink-500 text-lg md:text-xl">
-                          {formatPrice(totalPrice)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {submitError && (
-                    <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md">
-                      {submitError}
-                    </div>
-                  )}
-
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || totalPrice === 0}
-                    className="w-full bg-pink-500 hover:bg-pink-600 h-12 text-base font-medium"
-                  >
-                    {isSubmitting ? "Booking..." : "Book Now"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+            <div className="fixed bottom-4 right-4">
+              <Button
+                onClick={handleBookNow}
+                className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg shadow-lg"
+              >
+                Book Now
+              </Button>
+            </div>
           </div>
         </div>
       </div>
