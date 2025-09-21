@@ -10,7 +10,12 @@ interface AuthContextType {
   logout: () => void
 }
 
-export const AuthContext = createContext<AuthContextType | null>(null)
+// Extended AuthContextType to include user profile data
+export interface AuthContextTypeWithUser extends AuthContextType {
+  user: { username: string; profileImage?: string } | null
+}
+
+export const AuthContext = createContext<AuthContextTypeWithUser | null>(null)
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
@@ -20,9 +25,11 @@ export const useAuth = () => {
   return context
 }
 
-export const useAuthProvider = (): AuthContextType => {
+// Extended useAuth hook to include user profile data
+export const useAuthProvider = (): AuthContextTypeWithUser => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<{ username: string; profileImage?: string } | null>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,6 +40,10 @@ export const useAuthProvider = (): AuthContextType => {
           try {
             const isValid = await authApi.verifyToken()
             setIsAuthenticated(isValid)
+            if (isValid) {
+              const userProfile = await authApi.getUserProfile()
+              setUser(userProfile)
+            }
           } catch (error) {
             console.warn("API not available for token verification, checking locally")
             // Simple fallback - just check if token exists
@@ -56,6 +67,8 @@ export const useAuthProvider = (): AuthContextType => {
       try {
         await authApi.login(credentials)
         setIsAuthenticated(true)
+        const userProfile = await authApi.getUserProfile()
+        setUser(userProfile)
         return true
       } catch (apiError) {
         console.warn("API not available, using fallback auth:", apiError)
@@ -84,6 +97,7 @@ export const useAuthProvider = (): AuthContextType => {
     localStorage.removeItem("refresh")
     localStorage.removeItem("user")
     setIsAuthenticated(false)
+    setUser(null)
   }
 
   return {
@@ -91,5 +105,6 @@ export const useAuthProvider = (): AuthContextType => {
     loading,
     login,
     logout,
+    user,
   }
 }

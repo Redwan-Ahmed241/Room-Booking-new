@@ -227,6 +227,25 @@ export const authApi = {
     localStorage.removeItem("refresh")
     localStorage.removeItem("user")
   },
+
+  // Fetch user profile
+  getUserProfile: async () => {
+    const token = localStorage.getItem("access")
+    if (!token) throw new Error("No access token found")
+
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user profile")
+    }
+
+    return response.json()
+  },
 }
 
 // User authentication functions
