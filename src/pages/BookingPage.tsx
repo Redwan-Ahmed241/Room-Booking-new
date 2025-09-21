@@ -1,23 +1,28 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { Users, MapPin, Star } from "lucide-react"
-import { Button } from "../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { Badge } from "../components/ui/badge"
-import { useRoom } from "../hooks/useRooms"
-import { bookingsApi } from "../lib/api"
-import { formatPrice } from "../lib/utils"
-import type { PartialBookingData } from "../lib/types"
+import type React from "react";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Users, MapPin, Star } from "lucide-react";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Badge } from "../components/ui/badge";
+import { useRoom } from "../hooks/useRooms";
+import { bookingsApi } from "../lib/api";
+import { formatPrice } from "../lib/utils";
+import type { PartialBookingData } from "../lib/types";
 
 const BookingPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const { room, loading, error } = useRoom(id || "")
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { room, loading, error } = useRoom(id || "");
 
   const [bookingData, setBookingData] = useState<PartialBookingData>({
     checkIn: "",
@@ -28,47 +33,49 @@ const BookingPage: React.FC = () => {
       email: "",
       phone: "",
     },
-  })
+  });
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string | number) => {
     if (field.startsWith("guestInfo.")) {
-      const guestField = field.split(".")[1]
+      const guestField = field.split(".")[1];
       setBookingData((prev) => ({
         ...prev,
         guestInfo: {
           ...prev.guestInfo,
           [guestField]: value,
         },
-      }))
+      }));
     } else {
       setBookingData((prev) => ({
         ...prev,
         [field]: value,
-      }))
+      }));
     }
-  }
+  };
 
   const calculateTotalPrice = () => {
-    if (!room || !bookingData.checkIn || !bookingData.checkOut) return 0
+    if (!room || !bookingData.checkIn || !bookingData.checkOut) return 0;
 
-    const checkIn = new Date(bookingData.checkIn)
-    const checkOut = new Date(bookingData.checkOut)
-    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
+    const checkIn = new Date(bookingData.checkIn);
+    const checkOut = new Date(bookingData.checkOut);
+    const nights = Math.ceil(
+      (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
-    return nights > 0 ? nights * room.price : 0
-  }
+    return nights > 0 ? nights * room.price : 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       if (!room || !id) {
-        throw new Error("Room information not available")
+        throw new Error("Room information not available");
       }
 
       const bookingPayload = {
@@ -80,21 +87,23 @@ const BookingPage: React.FC = () => {
           name: bookingData.guestInfo!.name!,
           email: bookingData.guestInfo!.email!,
           phone: bookingData.guestInfo!.phone!,
-        }
-      }
+        },
+      };
 
-      await bookingsApi.createBooking(bookingPayload)
+      await bookingsApi.createBooking(bookingPayload);
 
       // Show success message and redirect
-      alert("Booking submitted successfully!")
-      navigate("/")
+      alert("Booking submitted successfully!");
+      navigate("/");
     } catch (err: any) {
-      setSubmitError(err.message || "Failed to submit booking. Please try again.")
-      console.error("Booking submission error:", err)
+      setSubmitError(
+        err.message || "Failed to submit booking. Please try again."
+      );
+      console.error("Booking submission error:", err);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -104,7 +113,7 @@ const BookingPage: React.FC = () => {
           <p className="text-gray-600">Loading room details...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !room) {
@@ -112,15 +121,18 @@ const BookingPage: React.FC = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">Room not found</p>
-          <Button onClick={() => navigate("/")} className="bg-pink-500 hover:bg-pink-600">
+          <Button
+            onClick={() => navigate("/")}
+            className="bg-pink-500 hover:bg-pink-600"
+          >
             Back to Home
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
-  const totalPrice = calculateTotalPrice()
+  const totalPrice = calculateTotalPrice();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -135,7 +147,9 @@ const BookingPage: React.FC = () => {
                 className="w-full h-48 md:h-64 object-cover"
               />
               <div className="p-4 md:p-6">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{room.name}</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                  {room.name}
+                </h1>
                 <div className="flex items-center text-gray-600 mb-3 md:mb-4">
                   <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
                   <span className="text-sm md:text-base">{room.location}</span>
@@ -143,28 +157,44 @@ const BookingPage: React.FC = () => {
 
                 <div className="flex items-center mb-3 md:mb-4">
                   <Star className="h-4 w-4 text-yellow-500 mr-1" />
-                  <span className="font-medium text-sm md:text-base">{room.rating}</span>
-                  <span className="text-gray-500 ml-1 text-sm md:text-base">({room.reviews} reviews)</span>
+                  <span className="font-medium text-sm md:text-base">
+                    {room.rating}
+                  </span>
+                  <span className="text-gray-500 ml-1 text-sm md:text-base">
+                    ({room.reviews} reviews)
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
                   <div className="text-center">
                     <Users className="h-4 w-4 md:h-5 md:w-5 mx-auto mb-1 text-gray-600" />
-                    <p className="text-xs md:text-sm text-gray-600">{room.maxGuests} guests</p>
+                    <p className="text-xs md:text-sm text-gray-600">
+                      {room.max_guests} guests
+                    </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs md:text-sm text-gray-600 mt-5">{room.bedrooms} bedrooms</p>
+                    <p className="text-xs md:text-sm text-gray-600 mt-5">
+                      {room.bedrooms} bedrooms
+                    </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs md:text-sm text-gray-600 mt-5">{room.bathrooms} bathrooms</p>
+                    <p className="text-xs md:text-sm text-gray-600 mt-5">
+                      {room.bathrooms} bathrooms
+                    </p>
                   </div>
                 </div>
 
                 <div className="mb-4 md:mb-6">
-                  <h3 className="font-semibold text-gray-900 mb-2 md:mb-3 text-sm md:text-base">Amenities</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2 md:mb-3 text-sm md:text-base">
+                    Amenities
+                  </h3>
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {room.amenities?.map((amenity) => (
-                      <Badge key={amenity} variant="outline" className="text-xs">
+                      <Badge
+                        key={amenity}
+                        variant="outline"
+                        className="text-xs"
+                      >
                         {amenity}
                       </Badge>
                     ))}
@@ -172,8 +202,12 @@ const BookingPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-2 md:mb-3 text-sm md:text-base">Description</h3>
-                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">{room.description}</p>
+                  <h3 className="font-semibold text-gray-900 mb-2 md:mb-3 text-sm md:text-base">
+                    Description
+                  </h3>
+                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                    {room.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -185,86 +219,126 @@ const BookingPage: React.FC = () => {
               <CardHeader className="pb-4">
                 <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <span className="text-lg md:text-xl">Book Your Stay</span>
-                  <span className="text-xl md:text-2xl font-bold text-pink-500">{formatPrice(room.price)}/night</span>
+                  <span className="text-xl md:text-2xl font-bold text-pink-500">
+                    {formatPrice(room.price)}/night
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-4 md:space-y-6"
+                >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div>
-                      <Label htmlFor="checkIn" className="text-sm md:text-base">Check-in</Label>
+                      <Label htmlFor="checkIn" className="text-sm md:text-base">
+                        Check-in
+                      </Label>
                       <Input
                         id="checkIn"
                         type="date"
                         required
                         value={bookingData.checkIn}
-                        onChange={(e) => handleInputChange("checkIn", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("checkIn", e.target.value)
+                        }
                         min={new Date().toISOString().split("T")[0]}
                         className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="checkOut" className="text-sm md:text-base">Check-out</Label>
+                      <Label
+                        htmlFor="checkOut"
+                        className="text-sm md:text-base"
+                      >
+                        Check-out
+                      </Label>
                       <Input
                         id="checkOut"
                         type="date"
                         required
                         value={bookingData.checkOut}
-                        onChange={(e) => handleInputChange("checkOut", e.target.value)}
-                        min={bookingData.checkIn || new Date().toISOString().split("T")[0]}
+                        onChange={(e) =>
+                          handleInputChange("checkOut", e.target.value)
+                        }
+                        min={
+                          bookingData.checkIn ||
+                          new Date().toISOString().split("T")[0]
+                        }
                         className="mt-1"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="guests" className="text-sm md:text-base">Guests</Label>
+                    <Label htmlFor="guests" className="text-sm md:text-base">
+                      Guests
+                    </Label>
                     <Input
                       id="guests"
                       type="number"
                       min="1"
-                      max={room.maxGuests}
+                      max={room.max_guests}
                       required
                       value={bookingData.guests}
-                      onChange={(e) => handleInputChange("guests", Number.parseInt(e.target.value))}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "guests",
+                          Number.parseInt(e.target.value)
+                        )
+                      }
                       className="mt-1"
                     />
                   </div>
 
                   <div className="space-y-3 md:space-y-4">
-                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">Guest Information</h3>
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">
+                      Guest Information
+                    </h3>
                     <div>
-                      <Label htmlFor="name" className="text-sm md:text-base">Full Name</Label>
+                      <Label htmlFor="name" className="text-sm md:text-base">
+                        Full Name
+                      </Label>
                       <Input
                         id="name"
                         type="text"
                         required
                         value={bookingData.guestInfo?.name}
-                        onChange={(e) => handleInputChange("guestInfo.name", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("guestInfo.name", e.target.value)
+                        }
                         placeholder="Enter your full name"
                         className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email" className="text-sm md:text-base">Email</Label>
+                      <Label htmlFor="email" className="text-sm md:text-base">
+                        Email
+                      </Label>
                       <Input
                         id="email"
                         type="email"
                         required
                         value={bookingData.guestInfo?.email}
-                        onChange={(e) => handleInputChange("guestInfo.email", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("guestInfo.email", e.target.value)
+                        }
                         placeholder="Enter your email"
                         className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone" className="text-sm md:text-base">Phone</Label>
+                      <Label htmlFor="phone" className="text-sm md:text-base">
+                        Phone
+                      </Label>
                       <Input
                         id="phone"
                         type="tel"
                         required
                         value={bookingData.guestInfo?.phone}
-                        onChange={(e) => handleInputChange("guestInfo.phone", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("guestInfo.phone", e.target.value)
+                        }
                         placeholder="Enter your phone number"
                         className="mt-1"
                       />
@@ -277,17 +351,22 @@ const BookingPage: React.FC = () => {
                         <span className="text-gray-700">
                           {formatPrice(room.price)} x{" "}
                           {Math.ceil(
-                            (new Date(bookingData.checkOut!).getTime() - new Date(bookingData.checkIn!).getTime()) /
-                            (1000 * 60 * 60 * 24),
+                            (new Date(bookingData.checkOut!).getTime() -
+                              new Date(bookingData.checkIn!).getTime()) /
+                              (1000 * 60 * 60 * 24)
                           )}{" "}
                           nights
                         </span>
-                        <span className="font-medium">{formatPrice(totalPrice)}</span>
+                        <span className="font-medium">
+                          {formatPrice(totalPrice)}
+                        </span>
                       </div>
                       <hr className="my-2 border-gray-200" />
                       <div className="flex justify-between items-center font-semibold text-sm md:text-base">
                         <span>Total</span>
-                        <span className="text-pink-500 text-lg md:text-xl">{formatPrice(totalPrice)}</span>
+                        <span className="text-pink-500 text-lg md:text-xl">
+                          {formatPrice(totalPrice)}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -312,7 +391,7 @@ const BookingPage: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BookingPage
+export default BookingPage;
