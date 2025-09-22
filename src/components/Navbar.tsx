@@ -13,7 +13,10 @@ const Navbar: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
 
   const handleLogout = () => {
-    logout();
+    logout().then(() => {
+      // Force page reload to ensure auth state is cleared
+      window.location.href = "/";
+    });
   };
 
   return (

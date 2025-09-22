@@ -33,6 +33,9 @@ const AdminLogin: React.FC = () => {
       const success = await login(credentials)
       if (!success) {
         setError("Invalid username or password")
+      } else {
+        // Login successful, redirect will happen automatically via useAuth
+        console.log("Login successful")
       }
     } catch (err: any) {
       setError(err.message || "Login failed. Please try again.")

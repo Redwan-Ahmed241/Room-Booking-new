@@ -183,13 +183,19 @@ export const authApi = {
       },
       body: JSON.stringify(credentials),
     })
+    
     if (!response.ok) {
-      throw new Error("Invalid credentials")
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.detail || errorData.message || "Invalid credentials")
     }
+    
     const data = await response.json()
     if (data.access) {
       localStorage.setItem("access", data.access)
       localStorage.setItem("refresh", data.refresh)
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user))
+      }
     }
     return data
   },
@@ -199,12 +205,20 @@ export const authApi = {
     const token = localStorage.getItem("access")
     if (!token) return false
 
-    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    return response.ok
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ token }),
+      })
+      return response.ok
+    } catch (error) {
+      console.warn("Token verification failed:", error)
+      return false
+    }
   },
 
   // Logout
@@ -233,18 +247,27 @@ export const authApi = {
     const token = localStorage.getItem("access")
     if (!token) throw new Error("No access token found")
 
-    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/users/me/`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch user profile")
+      if (!response.ok) {
+        throw new Error("Failed to fetch user profile")
+      }
+
+      return response.json()
+    } catch (error) {
+      // Fallback to stored user data
+      const storedUser = localStorage.getItem("user")
+      if (storedUser) {
+        return JSON.parse(storedUser)
+      }
+      throw error
     }
-
-    return response.json()
   },
 }
 

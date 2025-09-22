@@ -64,12 +64,11 @@ const LoginPage: React.FC = () => {
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
-      navigate("/");
+      // Force a page reload to ensure auth state is updated
+      window.location.href = "/";
     } catch (err: any) {
       setError(
-        err.response?.data?.detail ||
-          err.message ||
-          "Invalid username or password"
+        err.message || "Invalid username or password"
       );
     } finally {
       setIsLoading(false);
