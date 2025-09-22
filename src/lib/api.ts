@@ -174,9 +174,9 @@ export const bookingsApi = {
 
 // Auth API functions
 export const authApi = {
-  // Admin login
+  // Login
   login: async (credentials: { username: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+    const response = await fetch(`${API_BASE_URL}/login/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -190,86 +190,36 @@ export const authApi = {
     }
 
     const data = await response.json();
-    const { token: access, refresh, user } = data.data; // Adjusted to handle nested data object
+    const { token } = data; // Adjusted for simple token auth
 
-    if (access) {
-      localStorage.setItem("access", access);
-      localStorage.setItem("refresh", refresh);
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
-      }
+    if (token) {
+      localStorage.setItem("token", token);
     }
     return data;
-},
-
-  // Verify token
-  verifyToken: async () => {
-    const token = localStorage.getItem("access")
-    if (!token) return false
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/verify/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ token }),
-      })
-      return response.ok
-    } catch (error) {
-      console.warn("Token verification failed:", error)
-      return false
-    }
   },
 
   // Logout
-  logout: async () => {
-    const refresh = localStorage.getItem("refresh")
-    if (refresh) {
-      try {
-        await fetch(`${API_BASE_URL}/auth/logout/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ refresh }),
-        })
-      } catch (error) {
-        console.warn("Logout API call failed:", error)
-      }
-    }
-    localStorage.removeItem("access")
-    localStorage.removeItem("refresh")
-    localStorage.removeItem("user")
+  logout: () => {
+    localStorage.removeItem("token");
   },
 
   // Fetch user profile
   getUserProfile: async () => {
-    const token = localStorage.getItem("access")
-    if (!token) throw new Error("No access token found")
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/users/me/`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    const response = await fetch(`${API_BASE_URL}/auth/users/me/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch user profile")
-      }
-
-      return response.json()
-    } catch (error) {
-      // Fallback to stored user data
-      const storedUser = localStorage.getItem("user")
-      if (storedUser) {
-        return JSON.parse(storedUser)
-      }
-      throw error
+    if (!response.ok) {
+      throw new Error("Failed to fetch user profile")
     }
+
+    return response.json()
   },
 }
 
