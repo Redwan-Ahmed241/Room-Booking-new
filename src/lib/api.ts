@@ -176,29 +176,31 @@ export const bookingsApi = {
 export const authApi = {
   // Admin login
   login: async (credentials: { username: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/auth/jwt/login/`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(credentials),
-    })
-    
+    });
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.detail || errorData.message || "Invalid credentials")
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || errorData.message || "Invalid credentials");
     }
-    
-    const data = await response.json()
-    if (data.access) {
-      localStorage.setItem("access", data.access)
-      localStorage.setItem("refresh", data.refresh)
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user))
+
+    const data = await response.json();
+    const { token: access, refresh, user } = data.data; // Adjusted to handle nested data object
+
+    if (access) {
+      localStorage.setItem("access", access);
+      localStorage.setItem("refresh", refresh);
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
       }
     }
-    return data
-  },
+    return data;
+},
 
   // Verify token
   verifyToken: async () => {

@@ -93,7 +93,7 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
     try {
       setLoading(true)
       try {
-        const response = await authApi.login(credentials)
+        await authApi.login(credentials)
         setIsAuthenticated(true)
         try {
           const userProfile = await authApi.getUserProfile()
