@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, ChevronDown } from "lucide-react";
 import Logo from "./Logo";
 import { useAuth } from "../hooks/useAuth";
 
@@ -13,10 +13,9 @@ const Navbar: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
 
   const handleLogout = () => {
-    logout().then(() => {
-      // Force page reload to ensure auth state is cleared
-      window.location.href = "/";
-    });
+    logout();
+    // Force page reload to ensure auth state is cleared
+    window.location.href = "/";
   };
 
   return (
@@ -52,7 +51,7 @@ const Navbar: React.FC = () => {
             >
               Rooms
             </Link>
-            {isAuthenticated && (
+            {isAuthenticated && user?.role === "admin" && (
               <Link
                 to="/admin"
                 className={`text-sm font-medium transition-colors ${
@@ -69,18 +68,45 @@ const Navbar: React.FC = () => {
           {/* Right Side - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                {user?.profileImage ? (
-                  <img
-                    src={user.profileImage}
-                    alt={user.username}
-                    className="w-8 h-8 rounded-full"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-700">
-                      {user?.username?.[0]?.toUpperCase()}
-                    </span>
+              <div className="relative flex items-center space-x-2">
+                <button
+                  className="flex items-center space-x-2 border border-gray-300 rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none"
+                  onClick={() => setIsMenuOpen((open) => !open)}
+                >
+                  {user?.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt={user.username}
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                      <span className="text-sm font-medium text-gray-700">
+                        {user?.username?.[0]?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <span>Profile</span>
+                  <ChevronDown className="h-4 w-4 ml-1 text-gray-500" />
+                </button>
+                {isMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-50">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      My Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
                   </div>
                 )}
               </div>
@@ -138,17 +164,19 @@ const Navbar: React.FC = () => {
               </Link>
               {isAuthenticated ? (
                 <>
-                  <Link
-                    to="/admin"
-                    className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                      location.pathname === "/admin"
-                        ? "text-pink-500"
-                        : "text-gray-700 hover:text-pink-500"
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Admin Dashboard
-                  </Link>
+                  {user?.role === "admin" && (
+                    <Link
+                      to="/admin"
+                      className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                        location.pathname === "/admin"
+                          ? "text-pink-500"
+                          : "text-gray-700 hover:text-pink-500"
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       handleLogout();

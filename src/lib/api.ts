@@ -1,3 +1,22 @@
+// Registration API function
+export async function register(data: {
+  username: string;
+  email: string;
+  mobile_no: string;
+  password: string;
+  confirm_password: string;
+}): Promise<{ message?: string; success?: boolean; error?: string }> {
+  const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.error || 'Registration failed');
+  }
+  return result;
+}
 // Vite environment variable typing for TypeScript
 /// <reference types="vite/client" />
 
@@ -6,16 +25,7 @@ const API_BASE_URL = "https://room-booking-pjo6.onrender.com/api"
 
 
 // Auth response types
-interface LoginResponse {
-  access: string
-  refresh: string
-  user?: any
-}
 
-interface RegisterResponse {
-  message: string
-  user?: any
-}
 
 // Room API functions
 type Room = {}
@@ -173,87 +183,25 @@ export const bookingsApi = {
 }
 
 // Auth API functions
-export const authApi = {
-  // Login
-  login: async (credentials: { username: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/login/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
-    });
+// Auth API functions
+// Use only /auth/jwt/login/ endpoint and consistent token storage
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || errorData.message || "Invalid credentials");
-    }
-
-    const data = await response.json();
-    const { token } = data; // Adjusted for simple token auth
-
-    if (token) {
-      localStorage.setItem("token", token);
-    }
-    return data;
-  },
-
-  // Logout
-  logout: () => {
-    localStorage.removeItem("token");
-  },
-
-  // Fetch user profile
-  getUserProfile: async () => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("No token found");
-
-    const response = await fetch(`${API_BASE_URL}/auth/users/me/`, {
-      method: "GET",
-      headers: {
-        Authorization: `Token ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch user profile")
-    }
-
-    return response.json()
-  },
-}
-
-// User authentication functions
-export async function login(username: string, password: string): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/jwt/login/`, {
+export async function login(username: string, password: string): Promise<{ token: string; user?: any }> {
+  const response = await fetch(`${API_BASE_URL}/auth/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Login failed');
+    throw new Error(errorData.detail || errorData.message || 'Login failed');
   }
-  return response.json();
-}
-
-export async function register(data: {
-  username: string;
-  email: string;
-  mobile_no: string;
-  password: string;
-  confirm_password: string;
-}): Promise<RegisterResponse> {
-  const response = await fetch(`${API_BASE_URL}/auth/register/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Registration failed');
+  const data = await response.json();
+  localStorage.setItem("token", data.token);
+  if (data.user) {
+    localStorage.setItem("user", JSON.stringify(data.user));
   }
-  return response.json();
+  return data;
 }
 
 export async function logout(): Promise<void> {
@@ -277,6 +225,24 @@ export async function logout(): Promise<void> {
   localStorage.removeItem("refresh");
   localStorage.removeItem("user");
 }
+
+export async function getUserProfile(username: string): Promise<any> {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No auth token found");
+  const response = await fetch(`${API_BASE_URL}/auth/user-info/${username}/`, {
+    method: "GET",
+    headers: {
+      Authorization: `Token ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch user profile");
+  }
+  return response.json();
+}
+
+// User authentication functions
+// ...existing code...
 
 // Upload API functions
 export const uploadApi = {

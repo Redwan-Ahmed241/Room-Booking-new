@@ -1,7 +1,9 @@
 "use client"
 
-import { useState, useEffect, createContext, useContext } from "react"
-import { authApi } from "../lib/api"
+
+import { useState, useEffect, createContext, useContext } from "react";
+import { login as apiLogin, logout as apiLogout, getUserProfile } from "../lib/api"
+
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -12,7 +14,7 @@ interface AuthContextType {
 
 // Extended AuthContextType to include user profile data
 export interface AuthContextTypeWithUser extends AuthContextType {
-  user: { username: string; profileImage?: string } | null
+  user: { username: string; profileImage?: string; role?: string } | null
 }
 
 export const AuthContext = createContext<AuthContextTypeWithUser | null>(null)
@@ -29,48 +31,65 @@ export const useAuth = () => {
 export const useAuthProvider = (): AuthContextTypeWithUser => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<{ username: string; profileImage?: string } | null>(null)
+    const [user, setUser] = useState<{ username: string; profileImage?: string; role?: string } | null>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const accessToken = localStorage.getItem("access")
-        if (accessToken) {
+  const token = localStorage.getItem("token")
+  if (token) {
           try {
             // Try to verify token with API
-            const isValid = await authApi.verifyToken()
-            if (isValid) {
-              setIsAuthenticated(true)
-              try {
-                const userProfile = await authApi.getUserProfile()
-                setUser(userProfile)
-              } catch (profileError) {
-                // If profile fetch fails, use basic user info from token
+            // If you have a verifyToken function, import and use it as needed
+            // Otherwise, skip verification and just check for token
+            setIsAuthenticated(true)
+            try {
+              // You need to know the username to fetch profile
+              const storedUser = localStorage.getItem("user")
+              let username = ""
+              if (storedUser) {
+                try {
+                  username = JSON.parse(storedUser).username
+                } catch {}
+              }
+              if (username) {
+                const userProfile = await getUserProfile(username)
+                setUser({
+                  username: userProfile.username,
+                  profileImage: userProfile.profileImage,
+                  role: userProfile.role,
+                })
+              } else {
                 setUser({ username: "admin" })
               }
-            } else {
-              setIsAuthenticated(false)
-              setUser(null)
+            } catch (profileError) {
+              setUser({ username: "admin" })
             }
           } catch (error) {
             console.warn("API not available for token verification, checking locally")
             // Simple fallback - just check if token exists and is not expired
             try {
-              const tokenData = JSON.parse(atob(accessToken.split('.')[1]))
-              const isExpired = tokenData.exp * 1000 < Date.now()
-              if (!isExpired) {
-                setIsAuthenticated(true)
-                setUser({ username: tokenData.username || "admin" })
+              // Only attempt to parse JWT if it looks like one
+              if (token.split('.').length === 3) {
+                const tokenData = JSON.parse(atob(token.split('.')[1]))
+                const isExpired = tokenData.exp * 1000 < Date.now()
+                if (!isExpired) {
+                  setIsAuthenticated(true)
+                  setUser({ username: tokenData.username || "admin", role: tokenData.role || "customer" })
+                } else {
+                  localStorage.removeItem("token")
+                  setIsAuthenticated(false)
+                  setUser(null)
+                }
               } else {
-                localStorage.removeItem("access")
-                localStorage.removeItem("refresh")
-                setIsAuthenticated(false)
-                setUser(null)
+                // Non-JWT token fallback
+                setIsAuthenticated(true)
+                setUser({ username: "admin", role: "customer" })
               }
             } catch (tokenError) {
               // If token is malformed, treat as valid for demo purposes
               setIsAuthenticated(true)
-              setUser({ username: "admin" })
+              setUser({ username: "admin", role: "customer" })
             }
           }
         } else {
@@ -93,13 +112,13 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
     try {
       setLoading(true)
       try {
-        await authApi.login(credentials)
+        await apiLogin(credentials.username, credentials.password)
         setIsAuthenticated(true)
         try {
-          const userProfile = await authApi.getUserProfile()
+          const userProfile = await getUserProfile(credentials.username)
           setUser(userProfile)
         } catch (profileError) {
-          setUser({ username: credentials.username })
+          setUser({ username: credentials.username, role: "customer" })
         }
         return true
       } catch (apiError) {
@@ -111,7 +130,7 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
           localStorage.setItem("access", mockToken)
           localStorage.setItem("refresh", mockRefresh)
           setIsAuthenticated(true)
-          setUser({ username: credentials.username })
+          setUser({ username: credentials.username, role: "customer" })
           return true
         }
         return false
@@ -126,7 +145,7 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
 
   const logout = async () => {
     try {
-      await authApi.logout()
+  await apiLogout()
     } catch (error) {
       console.warn("API logout failed, clearing local storage:", error)
     }

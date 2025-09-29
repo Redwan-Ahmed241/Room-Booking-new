@@ -17,6 +17,7 @@ import AuthProvider from "./components/AuthProvider";
 import { useAuth } from "./hooks/useAuth";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ProfilePage from "./pages/ProfilePage";
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -61,6 +62,7 @@ const AppRoutes: React.FC = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="/profile" element={<ProfilePage />} />
                 </Routes>
               </>
             }
