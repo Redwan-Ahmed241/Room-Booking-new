@@ -226,19 +226,148 @@ export async function logout(): Promise<void> {
   localStorage.removeItem("user");
 }
 
+// User Profile API functions
+export const userProfileApi = {
+  // Get user profile by username
+  getUserProfile: async (username: string): Promise<any> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await fetch(`${API_BASE_URL}/auth/user-info/${username}/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to fetch user profile");
+    }
+    return response.json();
+  },
+
+  // Get current user profile (using token)
+  getCurrentUserProfile: async (): Promise<any> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to fetch current user profile");
+    }
+    return response.json();
+  },
+
+  // Update user profile
+  updateUserProfile: async (profileData: {
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    mobile_no?: string;
+    profile_image?: string;
+    bio?: string;
+  }): Promise<any> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify(profileData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to update user profile");
+    }
+    return response.json();
+  },
+
+  // Change password
+  changePassword: async (passwordData: {
+    current_password: string;
+    new_password: string;
+    confirm_password: string;
+  }): Promise<any> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await fetch(`${API_BASE_URL}/auth/change-password/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify(passwordData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to change password");
+    }
+    return response.json();
+  },
+
+  // Upload profile image
+  uploadProfileImage: async (imageFile: File): Promise<any> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found");
+    
+    const formData = new FormData();
+    formData.append("profile_image", imageFile);
+    
+    const response = await fetch(`${API_BASE_URL}/auth/upload-profile-image/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to upload profile image");
+    }
+    return response.json();
+  },
+
+  // Get user booking history
+  getUserBookings: async (): Promise<any> => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No auth token found");
+    
+    const response = await fetch(`${API_BASE_URL}/bookings/user-bookings/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Failed to fetch user bookings");
+    }
+    return response.json();
+  },
+};
+
+// Backward compatibility - keep existing function
 export async function getUserProfile(username: string): Promise<any> {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No auth token found");
-  const response = await fetch(`${API_BASE_URL}/auth/user-info/${username}/`, {
-    method: "GET",
-    headers: {
-      Authorization: `Token ${token}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch user profile");
-  }
-  return response.json();
+  return userProfileApi.getUserProfile(username);
 }
 
 // User authentication functions

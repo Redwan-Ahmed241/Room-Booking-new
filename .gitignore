@@ -27,3 +27,4 @@ yarn-error.log*
 next-env.d.ts
 .env
 Login_API_Documentation.md
+USER_PROFILE_API_SPEC.md
