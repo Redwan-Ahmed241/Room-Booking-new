@@ -60,10 +60,10 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
                   role: userProfile.role,
                 })
               } else {
-                setUser({ username: "admin" })
+                setUser({ username: "admin", role: "customer" })
               }
             } catch (profileError) {
-              setUser({ username: "admin" })
+              setUser({ username: "admin", role: "customer" })
             }
           } catch (error) {
             console.warn("API not available for token verification, checking locally")
@@ -127,10 +127,11 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
         if (credentials.username === "admin" && credentials.password === "admin123") {
           const mockToken = `mock-token-${Date.now()}`
           const mockRefresh = `mock-refresh-${Date.now()}`
+          localStorage.setItem("token", mockToken)
           localStorage.setItem("access", mockToken)
           localStorage.setItem("refresh", mockRefresh)
           setIsAuthenticated(true)
-          setUser({ username: credentials.username, role: "customer" })
+          setUser({ username: credentials.username, role: "admin" })
           return true
         }
         return false
