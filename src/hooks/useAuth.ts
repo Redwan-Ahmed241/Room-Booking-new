@@ -145,10 +145,12 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
 
   const logout = async () => {
     try {
-  await apiLogout()
+      await apiLogout()
     } catch (error) {
       console.warn("API logout failed, clearing local storage:", error)
     }
+    // Clear all possible token keys
+    localStorage.removeItem("token")
     localStorage.removeItem("access")
     localStorage.removeItem("refresh")
     localStorage.removeItem("user")
