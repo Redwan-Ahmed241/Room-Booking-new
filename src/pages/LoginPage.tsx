@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { login } from "../lib/api";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
@@ -8,42 +8,20 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
+  CardTitle,
 } from "../components/ui/card";
-import Logo from "../components/Logo";
-import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Mail,
+  Lock,
+  Loader2,
+  Home,
+  X,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-const PasswordInput: React.FC<{
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  showPassword: boolean;
-  setShowPassword: (show: boolean) => void;
-}> = ({ value, onChange, showPassword, setShowPassword }) => (
-  <div className="relative mt-1">
-    <Input
-      id="password"
-      type={showPassword ? "text" : "password"}
-      required
-      value={value}
-      onChange={onChange}
-      placeholder="Enter your password"
-      autoComplete="current-password"
-      className="pr-10 w-full"
-    />
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      aria-label={showPassword ? "Hide password" : "Show password"}
-      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-    >
-      {showPassword ? (
-        <EyeOff className="h-4 w-4 text-gray-400" />
-      ) : (
-        <Eye className="h-4 w-4 text-gray-400" />
-      )}
-    </button>
-  </div>
-);
+import HomePage from "./HomePage";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -72,97 +50,181 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:w-full sm:max-w-md">
-        <Card className="shadow-lg">
-          <div className="flex flex-col items-center mb-6">
-            <Logo className="h-16 w-16 mb-2" />
-            <h1 className="text-xl font-bold">Welcome Back</h1>
-          </div>
-          <CardHeader className="text-center">
-            <CardDescription className="text-gray-600">
-              Enter your credentials to continue
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="mt-1 w-full"
-                  placeholder="Enter your username"
-                  autoComplete="username"
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <PasswordInput
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
-                />
-                <div className="mt-2 text-center">
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-pink-500 hover:underline"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-              </div>
-              {error && (
-                <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md">
-                  {error}
-                </div>
-              )}
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-pink-500 hover:bg-pink-600 flex items-center justify-center"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
-            <div className="mt-6 text-center">
-              <Button
-                variant="ghost"
-                onClick={() => window.history.back()}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
-            </div>
-            <div className="mt-4 text-center">
-              <Link
-                to="/register"
-                className="inline-block px-6 py-2 text-sm font-medium text-white bg-pink-500 rounded-md hover:bg-pink-600"
-              >
-                Create Account
-              </Link>
-            </div>
-            <div className="mt-4 text-center">
-              <Button
-                onClick={() => navigate("/admin/login")}
-                className="inline-block px-6 py-2 text-sm font-medium text-white bg-pink-500 rounded-md hover:bg-pink-600"
-              >
-                Admin Login
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+  const homePageBackground = useMemo(
+    () => (
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <HomePage />
       </div>
-    </div>
+    ),
+    []
+  );
+
+  return (
+    <>
+      {/* Background HomePage */}
+      {homePageBackground}
+
+      {/* Modal Overlay */}
+      <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 z-10">
+        <div className="w-full max-w-sm max-h-[65vh] relative pointer-events-auto">
+          {/* Close Button */}
+          <button
+            onClick={() => navigate("/")}
+            className="absolute -top-10 right-0 text-gray-700 hover:text-gray-900 transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Login Card */}
+          <Card className="border-0 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] bg-white/90 backdrop-blur-md relative rounded-3xl overflow-y-auto">
+            <div className="text-center pt-4 pb-3">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl shadow-lg mb-2">
+                <Home className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                Welcome Back
+              </h2>
+              <p className="mt-1 text-xs text-gray-600">
+                Sign in to continue to your account
+              </p>
+            </div>
+
+            <CardContent className="space-y-3 pb-4 px-6">
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="username" className="text-xs font-medium">
+                    Username or Email
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="username"
+                      type="text"
+                      required
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="pl-8 h-9 text-sm border-gray-200 focus:border-pink-500 focus:ring-pink-500"
+                      placeholder="Enter your username"
+                      autoComplete="username"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-sm font-medium">
+                      Password
+                    </Label>
+                    <Link
+                      to="/forgot-password"
+                      className="text-xs text-pink-600 hover:text-pink-700 font-medium"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="pl-10 pr-10 h-11 border-gray-200 focus:border-pink-500 focus:ring-pink-500"
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center hover:opacity-70 transition-opacity"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                    <svg
+                      className="w-5 h-5 flex-shrink-0"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-11 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
+              </form>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-500">
+                    Don't have an account?
+                  </span>
+                </div>
+              </div>
+
+              {/* Sign Up Link */}
+              <div className="text-center">
+                <Link
+                  to="/register"
+                  className="text-sm font-medium text-pink-600 hover:text-pink-700"
+                >
+                  Create new account →
+                </Link>
+              </div>
+
+              {/* Back Button */}
+              <div className="text-center pt-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/")}
+                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Home
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Footer */}
+          <p className="mt-6 text-center text-xs text-gray-600">
+            By signing in, you agree to our Terms of Service and Privacy Policy
+          </p>
+        </div>
+      </div>
+    </>
   );
 };
 
