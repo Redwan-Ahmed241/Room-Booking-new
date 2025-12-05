@@ -19,8 +19,6 @@ import HomePage from "./HomePage";
 
 const RegisterPage: React.FC = () => {
   const [form, setForm] = useState({
-    username: "",
-    email: "",
     mobile_no: "",
     password: "",
     confirm_password: "",
@@ -46,8 +44,6 @@ const RegisterPage: React.FC = () => {
       setSuccess(data.message || "Registration successful. Check your email.");
       // Clear form on success
       setForm({
-        username: "",
-        email: "",
         mobile_no: "",
         password: "",
         confirm_password: "",
@@ -175,12 +171,12 @@ const RegisterPage: React.FC = () => {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center hover:opacity-70 transition-opacity"
+                      className="absolute inset-y-0 right-0 pr-2 flex items-center hover:opacity-70 transition-opacity"
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-gray-400" />
                       ) : (
-                        <Eye className="h-5 w-5 text-gray-400" />
+                        <Eye className="h-4 w-4 text-gray-400" />
                       )}
                     </button>
                   </div>

@@ -1,7 +1,7 @@
 // Registration API function
 export async function register(data: {
-  username: string;
-  email: string;
+  username?: string;
+  email?: string;
   mobile_no: string;
   password: string;
   confirm_password: string;
