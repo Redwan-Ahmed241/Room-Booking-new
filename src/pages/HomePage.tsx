@@ -168,7 +168,7 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* Featured Accommodations Section */}
-      <section className="py-12 md:py-16 px-4 max-w-7xl mx-auto">
+      <section className="py-12 md:py-16 px-4 max-w-7xl 2xl:max-w-screen-2xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">
             Featured Accommodations
@@ -273,7 +273,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-12 md:py-16 px-4 max-w-7xl mx-auto">
+      <section className="py-12 md:py-16 px-4 max-w-7xl 2xl:max-w-screen-2xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">
             Why Choose VillaEase?
