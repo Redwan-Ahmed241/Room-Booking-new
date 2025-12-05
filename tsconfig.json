@@ -30,7 +30,8 @@
     },
     "allowJs": true,
     "incremental": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "sourceMap": false
   },
   "include": [
     "src"
