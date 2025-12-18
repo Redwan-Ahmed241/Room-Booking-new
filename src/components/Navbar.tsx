@@ -149,7 +149,7 @@ const Navbar: React.FC = () => {
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Home
+                Villas
               </Link>
               <Link
                 to="/rooms"
@@ -177,6 +177,17 @@ const Navbar: React.FC = () => {
                       Admin Dashboard
                     </Link>
                   )}
+                  <Link
+                    to="/profile"
+                    className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                      location.pathname === "/profile"
+                        ? "text-pink-500"
+                        : "text-gray-700 hover:text-pink-500"
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    My Profile
+                  </Link>
                   <button
                     onClick={() => {
                       handleLogout();
