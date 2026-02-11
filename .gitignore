@@ -28,3 +28,6 @@ next-env.d.ts
 .env
 Login_API_Documentation.md
 USER_PROFILE_API_SPEC.md
+API_DOCUMENTATION.md
+# Documentation files (generated)
+FRONTEND_UPDATES_SUMMARY.md

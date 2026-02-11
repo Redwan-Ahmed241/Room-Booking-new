@@ -1,35 +1,116 @@
-// Registration API function
-export async function register(data: {
-  username?: string;
-  email?: string;
-  mobile_no: string;
-  password: string;
-  confirm_password: string;
-}): Promise<{ message?: string; success?: boolean; error?: string }> {
-  const response = await fetch(`${API_BASE_URL}/auth/register/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  const result = await response.json();
-  if (!response.ok) {
-    throw new Error(result.error || 'Registration failed');
-  }
-  return result;
-}
 // Vite environment variable typing for TypeScript
 /// <reference types="vite/client" />
 
-const API_BASE_URL = "https://room-booking-pjo6.onrender.com/api"
-
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://room-booking-pjo6.onrender.com/api"
 
 // Auth response types
+interface LoginResponse {
+  access: string
+  refresh: string
+  user?: {
+    id: number
+    username: string
+    email: string
+    role?: string
+  }
+}
 
+interface RegisterResponse {
+  success: boolean
+  message: string
+  user?: any
+}
+
+// Room type
+interface Room {
+  id: string
+  name: string
+  type: string
+  price: number
+  rating: number
+  reviews: number
+  images: string[]
+  amenities: string[]
+  description: string
+  location: string
+  maxGuests: number
+  bedrooms: number
+  bathrooms: number
+  size: number
+  available: boolean
+}
+
+interface Booking {
+  id: number
+  roomId: string
+  checkIn: string
+  checkOut: string
+  guests: number
+  totalPrice: number
+  status: string
+  guestInfo: {
+    name: string
+    email: string
+    phone: string
+  }
+}
+
+// Token management helpers
+const getAccessToken = (): string | null => localStorage.getItem("access")
+const getRefreshToken = (): string | null => localStorage.getItem("refresh")
+
+// API request wrapper with automatic token refresh
+async function apiRequest(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = getAccessToken()
+
+  const headers: HeadersInit = {
+    ...options.headers,
+  }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  if (options.body && !(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json'
+  }
+
+  let response = await fetch(url, { ...options, headers })
+
+  // If unauthorized, try to refresh token
+  if (response.status === 401) {
+    const refreshToken = getRefreshToken()
+    if (refreshToken) {
+      try {
+        const refreshResponse = await fetch(`${API_BASE_URL}/auth/token/refresh/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: refreshToken }),
+        })
+
+        if (refreshResponse.ok) {
+          const data = await refreshResponse.json()
+          localStorage.setItem("access", data.access)
+
+          // Retry original request with new token
+          headers['Authorization'] = `Bearer ${data.access}`
+          response = await fetch(url, { ...options, headers })
+        } else {
+          // Refresh failed, logout
+          logout()
+          throw new Error("Session expired. Please login again.")
+        }
+      } catch (error) {
+        logout()
+        throw error
+      }
+    }
+  }
+
+  return response
+}
 
 // Room API functions
-type Room = {}
-
 export const roomsApi = {
   // Get all rooms with filters
   getRooms: async (filters?: {
@@ -55,7 +136,7 @@ export const roomsApi = {
       filters.amenities.forEach((amenity) => params.append("amenities", amenity))
     }
 
-    const response = await fetch(`${API_BASE_URL}/rooms?${params}`)
+    const response = await fetch(`${API_BASE_URL}/rooms/?${params}`)
     if (!response.ok) {
       throw new Error("Failed to fetch rooms")
     }
@@ -73,13 +154,8 @@ export const roomsApi = {
 
   // Create new room (admin only)
   createRoom: async (roomData: Partial<Room>) => {
-    const accessToken = localStorage.getItem("access")
-    const response = await fetch(`${API_BASE_URL}/rooms`, {
+    const response = await apiRequest(`${API_BASE_URL}/rooms/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify(roomData),
     })
     if (!response.ok) {
@@ -90,13 +166,8 @@ export const roomsApi = {
 
   // Update room (admin only)
   updateRoom: async (id: string, roomData: Partial<Room>) => {
-    const accessToken = localStorage.getItem("access")
-    const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+    const response = await apiRequest(`${API_BASE_URL}/rooms/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify(roomData),
     })
     if (!response.ok) {
@@ -107,12 +178,8 @@ export const roomsApi = {
 
   // Delete room (admin only)
   deleteRoom: async (id: string) => {
-    const accessToken = localStorage.getItem("access")
-    const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+    const response = await apiRequest(`${API_BASE_URL}/rooms/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
     })
     if (!response.ok) {
       throw new Error("Failed to delete room")
@@ -123,7 +190,7 @@ export const roomsApi = {
 
 // Booking API functions
 export const bookingsApi = {
-  // Create new booking
+  // Create new booking (requires authentication)
   createBooking: async (bookingData: {
     roomId: string
     checkIn: string
@@ -135,29 +202,20 @@ export const bookingsApi = {
       phone: string
     }
   }) => {
-    const accessToken = localStorage.getItem("access")
-    const response = await fetch(`${API_BASE_URL}/bookings`, {
+    const response = await apiRequest(`${API_BASE_URL}/bookings`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify(bookingData),
     })
     if (!response.ok) {
-      throw new Error("Failed to create booking")
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || "Failed to create booking")
     }
     return response.json()
   },
 
   // Get all bookings (admin only)
   getBookings: async () => {
-    const accessToken = localStorage.getItem("access")
-    const response = await fetch(`${API_BASE_URL}/bookings`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
+    const response = await apiRequest(`${API_BASE_URL}/bookings`)
     if (!response.ok) {
       throw new Error("Failed to fetch bookings")
     }
@@ -166,13 +224,8 @@ export const bookingsApi = {
 
   // Update booking status (admin only)
   updateBookingStatus: async (id: string, status: string) => {
-    const accessToken = localStorage.getItem("access")
-    const response = await fetch(`${API_BASE_URL}/bookings/${id}/status`, {
+    const response = await apiRequest(`${API_BASE_URL}/bookings/${id}/status`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify({ status }),
     })
     if (!response.ok) {
@@ -182,90 +235,96 @@ export const bookingsApi = {
   },
 }
 
-// Auth API functions
-// Auth API functions
-// Use only /auth/jwt/login/ endpoint and consistent token storage
-
-export async function login(username: string, password: string): Promise<{ token: string; user?: any }> {
+// Auth API functions - JWT only
+export async function login(username: string, password: string): Promise<LoginResponse> {
   const response = await fetch(`${API_BASE_URL}/auth/login/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.detail || errorData.error || "Invalid credentials")
+  }
+
+  const data = await response.json()
+  const { access, refresh } = data
+
+  if (access && refresh) {
+    localStorage.setItem("access", access)
+    localStorage.setItem("refresh", refresh)
+
+    // Store user info if returned
+    if (data.user) {
+      localStorage.setItem("user", JSON.stringify(data.user))
+    }
+  }
+
+  return data
+}
+
+// Registration API function
+export async function register(data: {
+  username?: string;
+  email?: string;
+  mobile_no: string;
+  password: string;
+  confirm_password: string;
+}): Promise<RegisterResponse> {
+  const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || errorData.message || 'Login failed');
+    throw new Error(errorData.error || errorData.detail || 'Registration failed');
   }
-  const data = await response.json();
-  localStorage.setItem("token", data.token);
-  if (data.user) {
-    localStorage.setItem("user", JSON.stringify(data.user));
-  }
-  return data;
+
+  return response.json();
 }
 
 export async function logout(): Promise<void> {
-  const refresh = localStorage.getItem("refresh");
+  const refresh = getRefreshToken()
   if (refresh) {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/logout/`, {
+      await apiRequest(`${API_BASE_URL}/auth/logout/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh }),
-      });
-      if (!response.ok) {
-        console.warn('Logout API call failed');
-      }
+      })
     } catch (error) {
-      console.warn('Logout API call failed:', error);
+      console.warn('Logout API call failed:', error)
     }
   }
-  // Always clear local storage regardless of API call success
-  localStorage.removeItem("access");
-  localStorage.removeItem("refresh");
-  localStorage.removeItem("user");
+
+  // Always clear local storage
+  localStorage.removeItem("access")
+  localStorage.removeItem("refresh")
+  localStorage.removeItem("user")
+  localStorage.removeItem("token") // Remove old token if it exists
 }
 
-// User Profile API functions
+// User Profile API functions - Updated to use JWT
 export const userProfileApi = {
   // Get user profile by username
   getUserProfile: async (username: string): Promise<any> => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("No auth token found");
-    
-    const response = await fetch(`${API_BASE_URL}/auth/user-info/${username}/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-    });
-    
+    const response = await apiRequest(`${API_BASE_URL}/auth/user-info/${username}/`)
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to fetch user profile");
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || "Failed to fetch user profile")
     }
-    return response.json();
+    return response.json()
   },
 
-  // Get current user profile (using token)
+  // Get current user profile
   getCurrentUserProfile: async (): Promise<any> => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("No auth token found");
-    
-    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to fetch current user profile");
-    }
-    return response.json();
+    const user = getCurrentUser()
+    if (!user) throw new Error("No user logged in")
+
+    return userProfileApi.getUserProfile(user.username)
   },
 
   // Update user profile
@@ -277,23 +336,16 @@ export const userProfileApi = {
     profile_image?: string;
     bio?: string;
   }): Promise<any> => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("No auth token found");
-    
-    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+    const response = await apiRequest(`${API_BASE_URL}/auth/profile/`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
       body: JSON.stringify(profileData),
-    });
-    
+    })
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to update user profile");
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || "Failed to update user profile")
     }
-    return response.json();
+    return response.json()
   },
 
   // Change password
@@ -302,76 +354,51 @@ export const userProfileApi = {
     new_password: string;
     confirm_password: string;
   }): Promise<any> => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("No auth token found");
-    
-    const response = await fetch(`${API_BASE_URL}/auth/change-password/`, {
+    const response = await apiRequest(`${API_BASE_URL}/auth/change-password/`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
       body: JSON.stringify(passwordData),
-    });
-    
+    })
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to change password");
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || "Failed to change password")
     }
-    return response.json();
+    return response.json()
   },
 
   // Upload profile image
   uploadProfileImage: async (imageFile: File): Promise<any> => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("No auth token found");
-    
-    const formData = new FormData();
-    formData.append("profile_image", imageFile);
-    
-    const response = await fetch(`${API_BASE_URL}/auth/upload-profile-image/`, {
+    const formData = new FormData()
+    formData.append("profile_image", imageFile)
+
+    const response = await apiRequest(`${API_BASE_URL}/auth/upload-profile-image/`, {
       method: "POST",
-      headers: {
-        Authorization: `Token ${token}`,
-      },
       body: formData,
-    });
-    
+    })
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to upload profile image");
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || "Failed to upload profile image")
     }
-    return response.json();
+    return response.json()
   },
 
   // Get user booking history
   getUserBookings: async (): Promise<any> => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("No auth token found");
-    
-    const response = await fetch(`${API_BASE_URL}/bookings/user-bookings/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to fetch user bookings");
-    }
-    return response.json();
-  },
-};
+    const response = await apiRequest(`${API_BASE_URL}/bookings/user-bookings/`)
 
-// Backward compatibility - keep existing function
-export async function getUserProfile(username: string): Promise<any> {
-  return userProfileApi.getUserProfile(username);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || "Failed to fetch user bookings")
+    }
+    return response.json()
+  },
 }
 
-// User authentication functions
-// ...existing code...
+// Backward compatibility
+export async function getUserProfile(username: string): Promise<any> {
+  return userProfileApi.getUserProfile(username)
+}
 
 // Upload API functions
 export const uploadApi = {
@@ -382,17 +409,49 @@ export const uploadApi = {
       formData.append("images", file)
     })
 
-    const accessToken = localStorage.getItem("access")
-    const response = await fetch(`${API_BASE_URL}/upload/images`, {
+    const response = await apiRequest(`${API_BASE_URL}/upload/images`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: formData,
     })
+
     if (!response.ok) {
       throw new Error("Failed to upload images")
     }
+
     return response.json()
   },
+}
+
+// Token refresh function
+export async function refreshToken(): Promise<{ access: string }> {
+  const refresh = getRefreshToken()
+  if (!refresh) {
+    throw new Error("No refresh token available")
+  }
+
+  const response = await fetch(`${API_BASE_URL}/auth/token/refresh/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh }),
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to refresh token")
+  }
+
+  const data = await response.json()
+  localStorage.setItem("access", data.access)
+
+  return data
+}
+
+// Check if user is authenticated
+export const isAuthenticated = (): boolean => {
+  return !!(getAccessToken() && getRefreshToken())
+}
+
+// Get current user from localStorage
+export const getCurrentUser = () => {
+  const userStr = localStorage.getItem("user")
+  return userStr ? JSON.parse(userStr) : null
 }
