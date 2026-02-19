@@ -45,7 +45,7 @@ const AdminPage: React.FC = () => {
 
   const [newRoom, setNewRoom] = useState<Partial<Room>>({
     name: "",
-    type: "room",
+    type: "villa",
     price: 0,
     rating: 4.5,
     reviews: 0,
@@ -84,7 +84,7 @@ const AdminPage: React.FC = () => {
       try {
         const roomData = {
           name: newRoom.name,
-          type: newRoom.type || "room",
+          type: newRoom.type || "villa",
           price: newRoom.price,
           rating: newRoom.rating || 4.5,
           reviews: newRoom.reviews || 0,
@@ -107,7 +107,7 @@ const AdminPage: React.FC = () => {
         // Reset form
         setNewRoom({
           name: "",
-          type: "room",
+          type: "villa",
           price: 0,
           rating: 4.5,
           reviews: 0,
@@ -129,10 +129,10 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const handleDeleteRoom = async (id: string) => {
+  const handleDeleteRoom = async (id: number | string) => {
     if (confirm("Are you sure you want to delete this room?")) {
       try {
-        await roomsApi.deleteRoom(id);
+        await roomsApi.deleteRoom(String(id));
         await fetchRooms(); // Refresh the list
       } catch (err: any) {
         setError(err.message || "Failed to delete room");
@@ -141,11 +141,11 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const toggleAvailability = async (id: string) => {
+  const toggleAvailability = async (id: number | string) => {
     try {
-      const room = rooms.find((r) => r.id === id);
+      const room = rooms.find((r) => String(r.id) === String(id));
       if (room) {
-        await roomsApi.updateRoom(id, { available: !room.available });
+        await roomsApi.updateRoom(String(id), { available: !room.available });
         await fetchRooms(); // Refresh the list
       }
     } catch (err: any) {
@@ -369,9 +369,9 @@ const AdminPage: React.FC = () => {
                         }
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       >
-                        <option value="room">Room</option>
-                        <option value="suite">Suite</option>
                         <option value="villa">Villa</option>
+                        <option value="apartment">Apartment</option>
+                        <option value="suite">Suite</option>
                       </select>
                     </div>
                     <div>

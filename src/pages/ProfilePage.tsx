@@ -182,14 +182,14 @@ const ProfilePage: React.FC = () => {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600">
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 mr-2 text-pink-500" />
-                            {new Date(booking.check_in).toLocaleDateString()}
+                            {new Date(booking.checkIn).toLocaleDateString()}
                           </div>
                           <div className="flex items-center">
                             <Calendar className="h-4 w-4 mr-2 text-pink-500" />
-                            {new Date(booking.check_out).toLocaleDateString()}
+                            {new Date(booking.checkOut).toLocaleDateString()}
                           </div>
                           <div className="font-bold text-gray-900">
-                            Total: ${booking.total_price}
+                            Total: ${booking.totalPrice}
                           </div>
                         </div>
                       </CardContent>

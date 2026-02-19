@@ -44,20 +44,6 @@ interface Room {
   available: boolean
 }
 
-interface Booking {
-  id: number
-  roomId: string
-  checkIn: string
-  checkOut: string
-  guests: number
-  totalPrice: number
-  status: string
-  guestInfo: {
-    name: string
-    email: string
-    phone: string
-  }
-}
 
 // Token management helpers
 const getAccessToken = (): string | null => localStorage.getItem("access")
@@ -67,8 +53,8 @@ const getRefreshToken = (): string | null => localStorage.getItem("refresh")
 async function apiRequest(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getAccessToken()
 
-  const headers: HeadersInit = {
-    ...options.headers,
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string>),
   }
 
   if (token) {
@@ -149,7 +135,7 @@ export const roomsApi = {
 
   // Get single room by ID
   getRoom: async (id: string) => {
-    const response = await fetch(`${API_BASE_URL}/rooms/${id}`)
+    const response = await fetch(`${API_BASE_URL}/rooms/${id}/`)
     if (!response.ok) {
       throw new Error("Failed to fetch room")
     }
@@ -170,7 +156,7 @@ export const roomsApi = {
 
   // Update room (admin only)
   updateRoom: async (id: string, roomData: Partial<Room>) => {
-    const response = await apiRequest(`${API_BASE_URL}/rooms/${id}`, {
+    const response = await apiRequest(`${API_BASE_URL}/rooms/${id}/`, {
       method: "PUT",
       body: JSON.stringify(roomData),
     })
@@ -182,13 +168,15 @@ export const roomsApi = {
 
   // Delete room (admin only)
   deleteRoom: async (id: string) => {
-    const response = await apiRequest(`${API_BASE_URL}/rooms/${id}`, {
+    const response = await apiRequest(`${API_BASE_URL}/rooms/${id}/`, {
       method: "DELETE",
     })
     if (!response.ok) {
       throw new Error("Failed to delete room")
     }
-    return response.json()
+    // Handle cases where response may have no body (204)
+    const text = await response.text()
+    return text ? JSON.parse(text) : { success: true }
   },
 }
 
@@ -219,7 +207,7 @@ export const bookingsApi = {
 
   // Get all bookings (admin only)
   getBookings: async () => {
-    const response = await apiRequest(`${API_BASE_URL}/bookings`)
+    const response = await apiRequest(`${API_BASE_URL}/bookings/`)
     if (!response.ok) {
       throw new Error("Failed to fetch bookings")
     }
@@ -270,10 +258,14 @@ export async function login(username: string, password: string): Promise<LoginRe
     localStorage.setItem("access", access)
     localStorage.setItem("refresh", refresh)
 
-    // Store user info if returned
-    if (data.user) {
-      localStorage.setItem("user", JSON.stringify(data.user))
+    // Store user info from the custom JWT response (flat fields)
+    const userInfo = {
+      id: data.user_id,
+      username: data.username,
+      phone: data.phone,
+      role: data.role,
     }
+    localStorage.setItem("user", JSON.stringify(userInfo))
   }
 
   return data

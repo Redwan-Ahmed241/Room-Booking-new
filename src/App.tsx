@@ -62,7 +62,11 @@ const AppRoutes: React.FC = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } />
                 </Routes>
               </>
             }
