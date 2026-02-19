@@ -33,32 +33,29 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/"
-              className={`text-sm font-medium transition-colors ${
-                location.pathname === "/"
-                  ? "text-pink-500"
-                  : "text-gray-700 hover:text-pink-500"
-              }`}
+              className={`text-sm font-medium transition-colors ${location.pathname === "/"
+                ? "text-pink-500"
+                : "text-gray-700 hover:text-pink-500"
+                }`}
             >
               Villas
             </Link>
             <Link
               to="/rooms"
-              className={`text-sm font-medium transition-colors ${
-                location.pathname === "/rooms"
-                  ? "text-pink-500"
-                  : "text-gray-700 hover:text-pink-500"
-              }`}
+              className={`text-sm font-medium transition-colors ${location.pathname === "/rooms"
+                ? "text-pink-500"
+                : "text-gray-700 hover:text-pink-500"
+                }`}
             >
               Rooms
             </Link>
             {isAuthenticated && user?.role === "admin" && (
               <Link
                 to="/admin"
-                className={`text-sm font-medium transition-colors ${
-                  location.pathname === "/admin"
-                    ? "text-pink-500"
-                    : "text-gray-700 hover:text-pink-500"
-                }`}
+                className={`text-sm font-medium transition-colors ${location.pathname === "/admin"
+                  ? "text-pink-500"
+                  : "text-gray-700 hover:text-pink-500"
+                  }`}
               >
                 Admin Dashboard
               </Link>
@@ -90,7 +87,7 @@ const Navbar: React.FC = () => {
                   <ChevronDown className="h-4 w-4 ml-1 text-gray-500" />
                 </button>
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-50">
+                  <div className="absolute right-0 top-full mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg z-50">
                     <Link
                       to="/profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -142,22 +139,20 @@ const Navbar: React.FC = () => {
             <div className="space-y-2">
               <Link
                 to="/"
-                className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                  location.pathname === "/"
-                    ? "text-pink-500"
-                    : "text-gray-700 hover:text-pink-500"
-                }`}
+                className={`block px-4 py-2 text-sm font-medium transition-colors ${location.pathname === "/"
+                  ? "text-pink-500"
+                  : "text-gray-700 hover:text-pink-500"
+                  }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Villas
               </Link>
               <Link
                 to="/rooms"
-                className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                  location.pathname === "/rooms"
-                    ? "text-pink-500"
-                    : "text-gray-700 hover:text-pink-500"
-                }`}
+                className={`block px-4 py-2 text-sm font-medium transition-colors ${location.pathname === "/rooms"
+                  ? "text-pink-500"
+                  : "text-gray-700 hover:text-pink-500"
+                  }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Rooms
@@ -167,11 +162,10 @@ const Navbar: React.FC = () => {
                   {user?.role === "admin" && (
                     <Link
                       to="/admin"
-                      className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                        location.pathname === "/admin"
-                          ? "text-pink-500"
-                          : "text-gray-700 hover:text-pink-500"
-                      }`}
+                      className={`block px-4 py-2 text-sm font-medium transition-colors ${location.pathname === "/admin"
+                        ? "text-pink-500"
+                        : "text-gray-700 hover:text-pink-500"
+                        }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Admin Dashboard
@@ -179,11 +173,10 @@ const Navbar: React.FC = () => {
                   )}
                   <Link
                     to="/profile"
-                    className={`block px-4 py-2 text-sm font-medium transition-colors ${
-                      location.pathname === "/profile"
-                        ? "text-pink-500"
-                        : "text-gray-700 hover:text-pink-500"
-                    }`}
+                    className={`block px-4 py-2 text-sm font-medium transition-colors ${location.pathname === "/profile"
+                      ? "text-pink-500"
+                      : "text-gray-700 hover:text-pink-500"
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     My Profile
@@ -215,7 +208,7 @@ const Navbar: React.FC = () => {
                     Register
                   </Link>
                   <Link
-                    to="/admin-login"
+                    to="/admin/login"
                     className="block px-4 py-2 text-sm font-medium text-gray-700 hover:text-pink-500 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >

@@ -9,7 +9,8 @@ export interface Room {
   amenities: string[]
   description: string
   location: string
-  max_guests: number
+  maxGuests: number
+  max_guests?: number // alias for backward compat with mock data
   bedrooms: number
   bathrooms: number
   size: number

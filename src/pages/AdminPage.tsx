@@ -53,7 +53,7 @@ const AdminPage: React.FC = () => {
     amenities: [],
     description: "",
     location: "",
-    max_guests: 1,
+    maxGuests: 1,
     bedrooms: 1,
     bathrooms: 1,
     size: 30,
@@ -94,7 +94,7 @@ const AdminPage: React.FC = () => {
           amenities: newRoom.amenities || [],
           description: newRoom.description || "",
           location: newRoom.location,
-          maxGuests: newRoom.max_guests || 1,
+          maxGuests: newRoom.maxGuests || 1,
           bedrooms: newRoom.bedrooms || 1,
           bathrooms: newRoom.bathrooms || 1,
           size: newRoom.size || 30,
@@ -115,7 +115,7 @@ const AdminPage: React.FC = () => {
           amenities: [],
           description: "",
           location: "",
-          max_guests: 1,
+          maxGuests: 1,
           bedrooms: 1,
           bathrooms: 1,
           size: 30,
@@ -394,11 +394,11 @@ const AdminPage: React.FC = () => {
                       <Input
                         id="maxGuests"
                         type="number"
-                        value={newRoom.max_guests}
+                        value={newRoom.maxGuests}
                         onChange={(e) =>
                           setNewRoom({
                             ...newRoom,
-                            max_guests: Number(e.target.value),
+                            maxGuests: Number(e.target.value),
                           })
                         }
                         min="1"

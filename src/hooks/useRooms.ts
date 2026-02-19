@@ -32,7 +32,7 @@ export const useRooms = (filters?: Partial<SearchFilters>) => {
         filteredRooms = mockRooms.filter((room) => {
           const matchesLocation =
             !filters.location || room.location.toLowerCase().includes(filters.location.toLowerCase());
-          const matchesGuests = !filters.guests || room.max_guests >= filters.guests;
+          const matchesGuests = !filters.guests || room.maxGuests >= filters.guests;
           const matchesPrice =
             (!filters.minPrice || room.price >= filters.minPrice) &&
             (!filters.maxPrice || room.price <= filters.maxPrice);
@@ -73,7 +73,8 @@ export const useRoom = (id: string) => {
 
         // Try API first, fallback to mock data
         try {
-          const data = await roomsApi.getRoom(id)
+          const res = await roomsApi.getRoom(id)
+          const data = res.data || res;
           setRoom(data)
         } catch (apiError) {
           console.warn("API not available, using mock data:", apiError)

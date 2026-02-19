@@ -31,13 +31,13 @@ export const useAuth = () => {
 export const useAuthProvider = (): AuthContextTypeWithUser => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
-    const [user, setUser] = useState<{ username: string; profileImage?: string; role?: string } | null>(null)
+  const [user, setUser] = useState<{ username: string; profileImage?: string; role?: string } | null>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-  const token = localStorage.getItem("token")
-  if (token) {
+        const token = localStorage.getItem("access")
+        if (token) {
           try {
             // Try to verify token with API
             // If you have a verifyToken function, import and use it as needed
@@ -50,7 +50,7 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
               if (storedUser) {
                 try {
                   username = JSON.parse(storedUser).username
-                } catch {}
+                } catch { }
               }
               if (username) {
                 const userProfile = await getUserProfile(username)
@@ -112,14 +112,16 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
     try {
       setLoading(true)
       try {
-        await apiLogin(credentials.username, credentials.password)
+        const data = await apiLogin(credentials.username, credentials.password)
         setIsAuthenticated(true)
-        try {
-          const userProfile = await getUserProfile(credentials.username)
-          setUser(userProfile)
-        } catch (profileError) {
-          setUser({ username: credentials.username, role: "customer" })
+        // Build user info from the custom JWT response (user_id, username, phone, role)
+        const userInfo = {
+          username: data.username || credentials.username,
+          role: data.role || 'customer',
         }
+        setUser(userInfo)
+        // Also store in localStorage for persistence
+        localStorage.setItem("user", JSON.stringify(userInfo))
         return true
       } catch (apiError) {
         console.warn("API not available, using fallback auth:", apiError)
@@ -127,11 +129,11 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
         if (credentials.username === "admin" && credentials.password === "admin123") {
           const mockToken = `mock-token-${Date.now()}`
           const mockRefresh = `mock-refresh-${Date.now()}`
-          localStorage.setItem("token", mockToken)
           localStorage.setItem("access", mockToken)
           localStorage.setItem("refresh", mockRefresh)
           setIsAuthenticated(true)
           setUser({ username: credentials.username, role: "admin" })
+          localStorage.setItem("user", JSON.stringify({ username: credentials.username, role: "admin" }))
           return true
         }
         return false
@@ -151,7 +153,7 @@ export const useAuthProvider = (): AuthContextTypeWithUser => {
       console.warn("API logout failed, clearing local storage:", error)
     }
     // Clear all possible token keys
-    localStorage.removeItem("token")
+    localStorage.removeItem("token") // legacy cleanup
     localStorage.removeItem("access")
     localStorage.removeItem("refresh")
     localStorage.removeItem("user")

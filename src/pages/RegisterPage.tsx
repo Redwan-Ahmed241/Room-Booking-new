@@ -12,6 +12,8 @@ import {
   Lock,
   Loader2,
   UserPlus,
+  User,
+  Mail,
   X,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,6 +21,8 @@ import HomePage from "./HomePage";
 
 const RegisterPage: React.FC = () => {
   const [form, setForm] = useState({
+    username: "",
+    email: "",
     mobile_no: "",
     password: "",
     confirm_password: "",
@@ -44,6 +48,8 @@ const RegisterPage: React.FC = () => {
       setSuccess(data.message || "Registration successful. Check your email.");
       // Clear form on success
       setForm({
+        username: "",
+        email: "",
         mobile_no: "",
         password: "",
         confirm_password: "",
@@ -98,6 +104,44 @@ const RegisterPage: React.FC = () => {
             </div>
             <CardContent className="space-y-3 pt-0 pb-4 px-6">
               <form onSubmit={handleSubmit} className="space-y-2">
+                <div className="space-y-1">
+                  <Label htmlFor="username" className="text-xs font-medium">
+                    Username
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="username"
+                      name="username"
+                      type="text"
+                      required
+                      value={form.username}
+                      onChange={handleChange}
+                      className="pl-8 h-9 text-sm border-gray-200 focus:border-pink-500 focus:ring-pink-500"
+                      placeholder="Choose a username"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-xs font-medium">
+                    Email
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={handleChange}
+                      className="pl-8 h-9 text-sm border-gray-200 focus:border-pink-500 focus:ring-pink-500"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <Label htmlFor="mobile_no" className="text-xs font-medium">
                     Mobile Number

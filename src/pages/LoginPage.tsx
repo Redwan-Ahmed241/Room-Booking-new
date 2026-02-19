@@ -31,10 +31,15 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     try {
       const data = await login(username, password);
-      localStorage.setItem("token", data.token);
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+      // api.ts login() already stores access & refresh tokens in localStorage
+      // Store user info from the custom token response
+      const userInfo = {
+        id: data.user_id,
+        username: data.username,
+        phone: data.phone,
+        role: data.role,
+      };
+      localStorage.setItem("user", JSON.stringify(userInfo));
       // Force a page reload to ensure auth state is updated
       window.location.href = "/";
     } catch (err: any) {

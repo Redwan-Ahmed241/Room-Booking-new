@@ -89,9 +89,8 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
                 {room.images.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      index === currentImageIndex ? "bg-white" : "bg-white/50"
-                    }`}
+                    className={`w-1.5 h-1.5 rounded-full ${index === currentImageIndex ? "bg-white" : "bg-white/50"
+                      }`}
                   />
                 ))}
               </div>
@@ -110,9 +109,8 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
           }}
         >
           <Heart
-            className={`w-4 h-4 ${
-              isFavorite ? "fill-pink-500 text-pink-500" : "text-gray-600"
-            }`}
+            className={`w-4 h-4 ${isFavorite ? "fill-pink-500 text-pink-500" : "text-gray-600"
+              }`}
           />
         </Button>
 
@@ -149,7 +147,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
           </div>
 
           <div className="grid grid-cols-2 md:flex md:items-center md:justify-between text-xs md:text-sm text-gray-600 mb-3 gap-1 md:gap-0">
-            <span>{room.max_guests} guests</span>
+            <span>{room.maxGuests} guests</span>
             <span>{room.bedrooms} bed</span>
             <span>{room.bathrooms} bath</span>
             <span className="hidden md:inline">{room.size}m²</span>

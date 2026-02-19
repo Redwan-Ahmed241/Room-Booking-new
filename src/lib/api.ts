@@ -7,6 +7,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://room-booking-
 interface LoginResponse {
   access: string
   refresh: string
+  user_id: number
+  username: string
+  phone?: string
+  role?: string
   user?: {
     id: number
     username: string
@@ -202,7 +206,7 @@ export const bookingsApi = {
       phone: string
     }
   }) => {
-    const response = await apiRequest(`${API_BASE_URL}/bookings`, {
+    const response = await apiRequest(`${API_BASE_URL}/bookings/`, {
       method: "POST",
       body: JSON.stringify(bookingData),
     })
@@ -224,12 +228,23 @@ export const bookingsApi = {
 
   // Update booking status (admin only)
   updateBookingStatus: async (id: string, status: string) => {
-    const response = await apiRequest(`${API_BASE_URL}/bookings/${id}/status`, {
+    const response = await apiRequest(`${API_BASE_URL}/bookings/${id}/status/`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     })
     if (!response.ok) {
       throw new Error("Failed to update booking status")
+    }
+    return response.json()
+  },
+
+  // Get user booking history
+  getUserBookings: async (): Promise<any> => {
+    const response = await apiRequest(`${API_BASE_URL}/bookings/user-bookings/`)
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || "Failed to fetch user bookings")
     }
     return response.json()
   },
@@ -379,17 +394,6 @@ export const userProfileApi = {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       throw new Error(errorData.error || "Failed to upload profile image")
-    }
-    return response.json()
-  },
-
-  // Get user booking history
-  getUserBookings: async (): Promise<any> => {
-    const response = await apiRequest(`${API_BASE_URL}/bookings/user-bookings/`)
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || "Failed to fetch user bookings")
     }
     return response.json()
   },
