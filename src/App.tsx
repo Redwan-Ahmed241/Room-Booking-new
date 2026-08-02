@@ -13,6 +13,7 @@ import AdminSignUp from "./pages/AdminSignUp";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import HeroPage from "./pages/HeroPage";
+import LandingPage from "./pages/LandingPage";
 import VillaListPage from "./pages/VillaListPage";
 import VillaRoomsPage from "./pages/VillaRoomsPage";
 import RoomDetailPage from "./pages/RoomDetailPage";
@@ -179,7 +180,8 @@ const AppRoutes: React.FC = () => (
   <Router>
     <Routes>
       {/* Public Pages */}
-      <Route path="/" element={<HeroPage />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/hero" element={<HeroPage />} />
       <Route path="/properties" element={<PublicPropertyListPage />} />
       <Route path="/properties/:name" element={<PublicPropertyDetailPage />} />
       <Route path="/referencing/:token" element={<TenantReferencingForm />} />

@@ -1,4 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -119,4 +121,119 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Landing Page Animations (Canary-inspired) ───────────────────────────── */
+
+@keyframes neo-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes neo-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes neo-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes neo-scroll-cue {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50%      { transform: translateY(6px); opacity: 0.4; }
+}
+
+.neo-anim-up {
+  display: block;
+  animation: neo-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.neo-anim-fade {
+  animation: neo-fade 1s ease both;
+}
+
+.neo-marquee {
+  display: inline-flex;
+  gap: 0;
+  animation: neo-marquee 28s linear infinite;
+  will-change: transform;
+}
+
+.neo-scroll-cue {
+  display: inline-block;
+  animation: neo-scroll-cue 1.8s ease-in-out infinite;
+}
+
+/* ── Landing Section Row Hover ───────────────────────────────────────────── */
+
+.neo-action-row {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  padding: 28px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.3s;
+  cursor: pointer;
+}
+
+.neo-action-row:hover {
+  opacity: 0.7;
+}
+
+.neo-action-row:hover .neo-action-arrow {
+  transform: translateX(6px);
+}
+
+.neo-action-arrow {
+  transition: transform 0.3s;
+}
+
+/* ── FAQ Accordion ───────────────────────────────────────────────────────── */
+
+.neo-faq-item {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.neo-faq-item summary {
+  cursor: pointer;
+  padding: 20px 0;
+  font-weight: 600;
+  font-size: 16px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(244,239,230,0.9);
+  transition: color 0.2s;
+}
+
+.neo-faq-item summary:hover {
+  color: #f4efe6;
+}
+
+.neo-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.neo-faq-item[open] summary .neo-faq-chevron {
+  transform: rotate(45deg);
+}
+
+.neo-faq-chevron {
+  font-size: 20px;
+  transition: transform 0.3s;
+  flex: none;
+  color: rgba(244,239,230,0.4);
+}
+
+.neo-faq-answer {
+  padding: 0 0 20px;
+  color: rgba(244,239,230,0.55);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 70ch;
 }
