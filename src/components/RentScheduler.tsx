@@ -703,7 +703,7 @@ const RentScheduler: React.FC = () => {
                   />
                   <Calendar
                     className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-auto cursor-pointer hover:text-white/70 transition-colors"
-                    onClick={() => document.getElementById("startDate")?.showPicker?.()}
+                    onClick={() => (document.getElementById("startDate") as HTMLInputElement)?.showPicker?.()}
                   />
                 </div>
               </div>
@@ -735,7 +735,7 @@ const RentScheduler: React.FC = () => {
                 />
                 <Calendar
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-auto cursor-pointer hover:text-white/70 transition-colors"
-                  onClick={() => document.getElementById("endDate")?.showPicker?.()}
+                  onClick={() => (document.getElementById("endDate") as HTMLInputElement)?.showPicker?.()}
                 />
               </div>
             </div>
