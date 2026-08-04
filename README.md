@@ -1,6 +1,6 @@
 # NeoScape Properties LTD
 
-NeoScape Properties LTD is a React + Vite property management frontend for internal admin use. The current codebase focuses on managing properties, rooms, media, documents, rent schedules, and admin access flows. It is not a public guest-booking site in its current state.
+NeoScape Properties LTD is a web App property management  internal admin use. The current codebase focuses on managing properties, rooms, media, documents, rent schedules, and admin access flows. It is not a public guest-booking site in its current state.
 
 ## Current Scope
 
