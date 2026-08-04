@@ -28,6 +28,7 @@ interface Room {
 
 type RentScheduleApi = {
   id: number | string
+  room_id?: number | string | null
   room_name: string
   tenant_name: string
   tenant_email: string
@@ -66,7 +67,7 @@ const mapPaymentFromApi = (payment: RentPaymentApi): RentPayment => ({
 
 const mapScheduleFromApi = (schedule: RentScheduleApi): RentSchedule => ({
   id: String(schedule.id),
-  roomId: String(schedule.id),
+  roomId: schedule.room_id ? String(schedule.room_id) : String(schedule.id),
   roomName: schedule.room_name,
   tenantName: schedule.tenant_name,
   tenantEmail: schedule.tenant_email,
