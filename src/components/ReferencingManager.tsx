@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { referencingApi, roomsApi, type ReferencingApplication } from "../lib/api";
 import { 
     Users, 
@@ -102,11 +103,11 @@ const ReferencingManager: React.FC<ReferencingManagerProps> = ({ propertyName })
             setApplications((prev) =>
                 prev.map((app) => (app.id === updated.id ? updated : app))
             );
-            setSelectedApp(updated);
-            alert("Application decision updated successfully!");
+            setSelectedApp(null);
+            toast.success("Decision saved successfully");
         } catch (err: any) {
             console.error("Failed to update decision:", err);
-            alert(err.message || "Failed to update decision.");
+            toast.error(err.message || "Failed to update decision.");
         } finally {
             setUpdating(false);
         }
@@ -416,6 +417,21 @@ const ReferencingManager: React.FC<ReferencingManagerProps> = ({ propertyName })
                                                 </div>
                                             </div>
                                         )}
+
+                                        {/* Tenant Signature */}
+                                        {selectedApp.application_data?.signature_image && (
+                                            <div className="space-y-2">
+                                                <div className="text-xs text-white/40 uppercase font-semibold">Applicant Signature</div>
+                                                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex justify-center">
+                                                    <img
+                                                        src={selectedApp.application_data.signature_image}
+                                                        alt="Tenant Signature"
+                                                        className="max-h-24 w-auto"
+                                                        style={{ filter: "invert(1)" }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -456,19 +472,24 @@ const ReferencingManager: React.FC<ReferencingManagerProps> = ({ propertyName })
                                             <CheckCircle className="w-4 h-4" />
                                             <span>PDF Referencing Report is available.</span>
                                         </div>
-                                        <a
-                                            href={selectedApp.report_pdf_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-all"
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                try {
+                                                    await referencingApi.downloadReport(selectedApp.id);
+                                                } catch (err: any) {
+                                                    alert("Failed to download PDF: " + err.message);
+                                                }
+                                            }}
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-all cursor-pointer"
                                         >
                                             <Download className="w-3.5 h-3.5" /> Download PDF
-                                        </a>
+                                        </button>
                                     </div>
                                 )}
 
                                 <div>
-                                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-1.5">Decision Decision</label>
+                                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-1.5">Override Decision</label>
                                     <div className="grid grid-cols-3 gap-2">
                                         <button
                                             type="button"

@@ -1,4 +1,5 @@
 "use client";
+import { Toaster } from "sonner";
 
 import type React from "react";
 import {
@@ -236,6 +237,7 @@ const AppRoutes: React.FC = () => (
 const App: React.FC = () => (
   <AuthProvider>
     <AppRoutes />
+    <Toaster theme="dark" position="top-right" richColors closeButton />
   </AuthProvider>
 );
 

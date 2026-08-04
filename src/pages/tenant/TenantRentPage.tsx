@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CreditCard, Calendar, AlertTriangle, CheckCircle, Clock, PoundSterling, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { tenantRentApi } from "../../lib/tenantApi";
 import { stripeApi } from "../../lib/api";
 import type { TenantRentSchedule, TenantRentReminder } from "../../lib/tenantApi";
@@ -12,40 +13,48 @@ export default function TenantRentPage() {
   const [loading, setLoading] = useState(true);
   const [payingId, setPayingId] = useState<number | null>(null);
 
+  const reloadData = async () => {
+    try {
+      const [s, r] = await Promise.all([
+        tenantRentApi.mySchedules(),
+        tenantRentApi.myReminders(),
+      ]);
+      setSchedules(s);
+      setReminders(r);
+    } catch { /* ignore */ }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [s, r] = await Promise.all([
-          tenantRentApi.mySchedules(),
-          tenantRentApi.myReminders(),
-        ]);
-        setSchedules(s);
-        setReminders(r);
-      } catch { /* ignore */ }
-      setLoading(false);
-    };
-    load();
+    reloadData().finally(() => setLoading(false));
   }, []);
 
   // Handle Stripe redirect return
   useEffect(() => {
-    // Try both raw window search and hash router parsing if any
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('stripe_session_id') || params.get('session_id');
+    let params = new URLSearchParams(window.location.search);
+    let sessionId = params.get('stripe_session_id') || params.get('session_id');
+
+    if (!sessionId && window.location.hash.includes('?')) {
+      const hashQuery = window.location.hash.split('?')[1];
+      params = new URLSearchParams(hashQuery);
+      sessionId = params.get('stripe_session_id') || params.get('session_id');
+    }
     
     if (sessionId) {
-      stripeApi.verifySuccess(sessionId).then((res) => {
-        if (res.success) {
-          alert('Payment confirmed! Thank you.');
-          // Reload schedules to reflect updated payment status
-          tenantRentApi.mySchedules().then(setSchedules).catch(() => {});
-        }
-      }).catch((err) => {
-        console.error('Payment verification failed:', err);
-      });
-      // Clean the URL query params
-      const cleanUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState({}, '', cleanUrl);
+      stripeApi.verifySuccess(sessionId)
+        .then(async (res) => {
+          if (res.success) {
+            toast.success("Payment confirmed! Thank you.");
+            await reloadData();
+          }
+        })
+        .catch((err) => {
+          console.error("Payment verification error:", err);
+          toast.error(err.message || "Payment verification failed.");
+        })
+        .finally(() => {
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, '', cleanUrl);
+        });
     }
   }, []);
 

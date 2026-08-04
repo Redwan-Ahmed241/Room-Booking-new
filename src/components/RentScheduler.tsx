@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Calendar,
   PoundSterling,
@@ -62,6 +62,16 @@ const RentScheduler: React.FC = () => {
     null,
   );
   const [recordingPayment, setRecordingPayment] = useState<string | null>(null);
+  const paymentFormRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to payment form when it appears
+  useEffect(() => {
+    if (recordingPayment && paymentFormRef.current) {
+      setTimeout(() => {
+        paymentFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [recordingPayment]);
 
   // Room dropdown state
   const [rooms, setRooms] = useState<RoomOption[]>([]);
@@ -374,34 +384,34 @@ const RentScheduler: React.FC = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-white/5 border-white/10">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{schedules.length}</div>
-            <div className="text-sm text-gray-600">Active Schedules</div>
+            <div className="text-2xl font-bold text-white">{schedules.length}</div>
+            <div className="text-sm font-medium text-white/70">Active Schedules</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white/5 border-white/10">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-emerald-400">
               £{totalMonthlyRent.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-600">Monthly Expected</div>
+            <div className="text-sm font-medium text-white/70">Monthly Expected</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white/5 border-white/10">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-blue-400">
               {paidThisMonth}
             </div>
-            <div className="text-sm text-gray-600">Paid This Month</div>
+            <div className="text-sm font-medium text-white/70">Paid This Month</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white/5 border-white/10">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-amber-400">
               {pendingPayments}
             </div>
-            <div className="text-sm text-gray-600">Pending Payments</div>
+            <div className="text-sm font-medium text-white/70">Pending Payments</div>
           </CardContent>
         </Card>
       </div>
@@ -491,7 +501,7 @@ const RentScheduler: React.FC = () => {
 
                         if (Object.keys(grouped).length === 0) {
                           return (
-                            <div className="px-3 py-2.5 text-xs text-white/30">
+                            <div className="px-3 py-2.5 text-xs text-white/60">
                               {roomsLoading ? "Loading…" : "No rooms found"}
                             </div>
                           );
@@ -501,8 +511,8 @@ const RentScheduler: React.FC = () => {
                           ([location, rms]) => (
                             <div key={location}>
                               <div
-                                className="px-3 py-1.5 text-[10px] font-semibold text-white/25 uppercase tracking-wider"
-                                style={{ background: "rgba(255,255,255,0.03)" }}
+                                className="px-3 py-1.5 text-[10px] font-semibold text-white/60 uppercase tracking-wider"
+                                style={{ background: "rgba(255,255,255,0.06)" }}
                               >
                                 {location}
                               </div>
@@ -669,51 +679,65 @@ const RentScheduler: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="startDate">Start Date *</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={
-                    editingSchedule
-                      ? editingSchedule.startDate
-                      : newSchedule.startDate
-                  }
-                  onChange={(e) =>
-                    editingSchedule
-                      ? setEditingSchedule({
-                          ...editingSchedule,
-                          startDate: e.target.value,
-                        })
-                      : setNewSchedule({
-                          ...newSchedule,
-                          startDate: e.target.value,
-                        })
-                  }
-                />
+                <div className="relative">
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={
+                      editingSchedule
+                        ? editingSchedule.startDate
+                        : newSchedule.startDate
+                    }
+                    onChange={(e) =>
+                      editingSchedule
+                        ? setEditingSchedule({
+                            ...editingSchedule,
+                            startDate: e.target.value,
+                          })
+                        : setNewSchedule({
+                            ...newSchedule,
+                            startDate: e.target.value,
+                          })
+                    }
+                    className="pr-10"
+                  />
+                  <Calendar
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-auto cursor-pointer hover:text-white/70 transition-colors"
+                    onClick={() => document.getElementById("startDate")?.showPicker?.()}
+                  />
+                </div>
               </div>
             </div>
 
             <div>
               <Label htmlFor="endDate">End Date (Optional)</Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={
-                  editingSchedule
-                    ? editingSchedule.endDate
-                    : newSchedule.endDate
-                }
-                onChange={(e) =>
-                  editingSchedule
-                    ? setEditingSchedule({
-                        ...editingSchedule,
-                        endDate: e.target.value,
-                      })
-                    : setNewSchedule({
-                        ...newSchedule,
-                        endDate: e.target.value,
-                      })
-                }
-              />
+              <div className="relative">
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={
+                    editingSchedule
+                      ? editingSchedule.endDate
+                      : newSchedule.endDate
+                  }
+                  onChange={(e) =>
+                    editingSchedule
+                      ? setEditingSchedule({
+                          ...editingSchedule,
+                          endDate: e.target.value,
+                        })
+                      : setNewSchedule({
+                          ...newSchedule,
+                          endDate: e.target.value,
+                        })
+                  }
+                  className="pr-10"
+                />
+                <Calendar
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-auto cursor-pointer hover:text-white/70 transition-colors"
+                  onClick={() => document.getElementById("endDate")?.showPicker?.()}
+                />
+              </div>
             </div>
 
             <div className="flex gap-2">
@@ -742,7 +766,7 @@ const RentScheduler: React.FC = () => {
 
       {/* Record Payment Form */}
       {recordingPayment && (
-        <Card className="border-green-200">
+        <Card ref={paymentFormRef} className="border-green-200">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Record Payment
@@ -854,12 +878,12 @@ const RentScheduler: React.FC = () => {
           ) : (
             <div className="space-y-3">
               {schedules.map((schedule) => (
-                <Card key={schedule.id} className="border">
+                <Card key={schedule.id} className="border border-white/10 bg-white/[0.02]">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-medium text-lg">
+                          <h4 className="font-semibold text-lg text-white">
                             {schedule.roomName}
                           </h4>
                           <Badge
@@ -870,11 +894,11 @@ const RentScheduler: React.FC = () => {
                             {getPaymentStatus(schedule)}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/80 mb-3">
                           <div className="flex items-center">
-                            <User className="w-4 h-4 mr-2" />
+                            <User className="w-4 h-4 mr-2 text-white/60" />
                             <div>
-                              <div>
+                              <div className="text-white font-medium">
                                 {getTenantPrimaryLabel(
                                   schedule.tenantName,
                                   schedule.tenantEmail,
@@ -884,7 +908,7 @@ const RentScheduler: React.FC = () => {
                                 schedule.tenantName,
                                 schedule.tenantEmail,
                               ) && (
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-white/60">
                                   {getTenantSecondaryLabel(
                                     schedule.tenantName,
                                     schedule.tenantEmail,
@@ -894,23 +918,23 @@ const RentScheduler: React.FC = () => {
                             </div>
                           </div>
                           <div className="flex items-center">
-                            <PoundSterling className="w-4 h-4 mr-2" />
+                            <PoundSterling className="w-4 h-4 mr-2 text-white/60" />
                             £{schedule.monthlyRent.toLocaleString()} / month
                           </div>
                           <div className="flex items-center">
-                            <Clock className="w-4 h-4 mr-2" />
+                            <Clock className="w-4 h-4 mr-2 text-white/60" />
                             Due on day {schedule.dueDay}
                           </div>
                           <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <Calendar className="w-4 h-4 mr-2 text-white/60" />
                             Since{" "}
                             {new Date(schedule.startDate).toLocaleDateString()}
                           </div>
                         </div>
 
                         {schedule.paymentHistory.length > 0 && (
-                          <div className="mt-3 p-3 bg-gray-50 rounded-lg text-black">
-                            <p className="text-sm font-medium mb-2">
+                          <div className="mt-3 p-3 bg-white/[0.04] border border-white/10 rounded-lg text-white">
+                            <p className="text-sm font-semibold text-white/90 mb-2">
                               Recent Payments:
                             </p>
                             <div className="space-y-1">
@@ -920,14 +944,14 @@ const RentScheduler: React.FC = () => {
                                 .map((payment) => (
                                   <div
                                     key={payment.id}
-                                    className="flex justify-between text-sm"
+                                    className="flex justify-between text-sm items-center py-0.5"
                                   >
-                                    <span>
+                                    <span className="text-white/80">
                                       {new Date(
                                         payment.paidDate || payment.dueDate,
                                       ).toLocaleDateString()}
                                     </span>
-                                    <span className="font-medium">
+                                    <span className="font-semibold text-white">
                                       £
                                       {payment.paidAmount?.toLocaleString() ||
                                         0}
