@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { Building2, Home, ArrowRight, ChevronDown } from "lucide-react";
 import { publicApi } from "../lib/tenantApi";
 import InterestFormModal from "../components/InterestFormModal";
+import Logo from "../components/Logo";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CONSTANTS
@@ -498,44 +499,12 @@ export default function LandingPage() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 10,
               textDecoration: "none",
               color: "#f4efe6",
               flex: "none",
             }}
           >
-            <span
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: "50%",
-                background: "#10b981",
-                display: "grid",
-                placeItems: "center",
-                flex: "none",
-              }}
-            >
-              <img
-                alt="NeoScape logo"
-                src="/Logo.png"
-                style={{
-                  width: 26,
-                  height: 26,
-                  objectFit: "contain",
-                  borderRadius: "50%",
-                }}
-              />
-            </span>
-            <span
-              style={{
-                fontWeight: 700,
-                fontSize: 18,
-                letterSpacing: "-0.01em",
-                whiteSpace: "nowrap",
-              }}
-            >
-              NeoScape
-            </span>
+            <Logo size="md" height="3.2rem" color="#10b981" />
           </a>
 
           {/* Nav links */}
@@ -1435,22 +1404,8 @@ export default function LandingPage() {
         >
           <div className="grid md:grid-cols-3 gap-12 mb-16">
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                <span
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    background: "#10b981",
-                    display: "grid",
-                    placeItems: "center",
-                  }}
-                >
-                  <img src="/Logo.png" alt="" style={{ width: 22, height: 22, objectFit: "contain", borderRadius: "50%" }} />
-                </span>
-                <span style={{ fontWeight: 700, fontSize: 16, color: "#f4efe6" }}>
-                  NeoScape Properties
-                </span>
+              <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+                <Logo size="md" height="3rem" color="#10b981" />
               </div>
               <p style={{ fontSize: "13.5px", lineHeight: 1.6, maxWidth: "36ch" }}>
                 A centralized property management ecosystem. Digital documents,
