@@ -25,7 +25,7 @@ const VillaListPage: React.FC = () => {
 
   const villas = useMemo<Villa[]>(() => {
     const grouped: Record<string, Room[]> = {};
-    rooms.forEach((room) => {
+    rooms.forEach((room: Room) => {
       const key = room.location || "Unassigned";
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(room);

@@ -171,7 +171,7 @@ const VillaRoomsPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {rooms.map((room) => (
+            {rooms.map((room: Room) => (
               <button
                 key={room.id}
                 onClick={() => navigate(`/admin/room/${room.id}`)}
