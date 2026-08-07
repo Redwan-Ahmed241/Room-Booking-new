@@ -1,10 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, MapPin, ChevronRight, Plus, Loader2, AlertCircle, Home, X } from "lucide-react";
-import { roomsApi, propertyImagesApi } from "../lib/api";
+import { useRooms } from "../hooks/useRooms";
 import type { Room } from "../lib/types";
 
 interface Villa {
@@ -17,33 +17,11 @@ interface Villa {
 }
 
 const VillaListPage: React.FC = () => {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [propertyImages, setPropertyImages] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { rooms, propertyImages, isLoading, createRoom, isCreating } = useRooms();
   const [error, setError] = useState<string | null>(null);
   const [showAddVilla, setShowAddVilla] = useState(false);
   const [newVillaName, setNewVillaName] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => { fetchRooms(); }, []);
-
-  const fetchRooms = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const [roomsResponse, imagesData] = await Promise.all([
-        roomsApi.getRooms(),
-        propertyImagesApi.list().catch(() => []),
-      ]);
-      setRooms(roomsResponse.data || roomsResponse);
-      setPropertyImages(imagesData);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch properties");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const villas = useMemo<Villa[]>(() => {
     const grouped: Record<string, Room[]> = {};
@@ -55,8 +33,8 @@ const VillaListPage: React.FC = () => {
     return Object.entries(grouped)
       .map(([name, villaRooms]) => {
         // Find property-level image (prefer primary, fallback to first, then room image)
-        const propImages = propertyImages.filter((img) => img.property_name === name);
-        const primaryImage = propImages.find((img) => img.is_primary) || propImages[0];
+        const propImages = propertyImages.filter((img: any) => img.property_name === name);
+        const primaryImage = propImages.find((img: any) => img.is_primary) || propImages[0];
         const previewImage = primaryImage ? primaryImage.image_url : (villaRooms[0]?.images?.[0] || "");
 
         return {
@@ -77,18 +55,15 @@ const VillaListPage: React.FC = () => {
     const exists = villas.some((v) => v.name.toLowerCase() === trimmedName.toLowerCase());
     if (!exists) {
       try {
-        setIsCreating(true);
-        await roomsApi.createRoom({
+        setError(null);
+        await createRoom({
           name: "Main Room", type: "villa", price: 0,
           location: trimmedName, description: "Default room for this property",
           maxGuests: 1, bedrooms: 1, bathrooms: 1, size: 0, amenities: [], images: [],
         });
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to create property");
-        setIsCreating(false);
         return;
-      } finally {
-        setIsCreating(false);
       }
     }
     navigate(`/admin/villa/${encodeURIComponent(trimmedName)}`);

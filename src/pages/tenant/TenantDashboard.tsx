@@ -1,38 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Home, CreditCard, FileText, AlertTriangle, Clock, MapPin, Users, Bed, Bath, Ruler } from "lucide-react";
-import { tenantAssignmentApi, tenantRentApi, tenantDocumentApi } from "../../lib/tenantApi";
-import type { TenantAssignment, TenantRentReminder, TenantDocumentItem } from "../../lib/tenantApi";
+import { useTenantDashboard } from "../../hooks/useTenantDashboard";
 
 export default function TenantDashboard() {
   const navigate = useNavigate();
-  const [assignment, setAssignment] = useState<TenantAssignment | null>(null);
-  const [room, setRoom] = useState<any>(null);
-  const [reminders, setReminders] = useState<TenantRentReminder[]>([]);
-  const [documents, setDocuments] = useState<TenantDocumentItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { assignment, room, reminders, documents, isLoading } = useTenantDashboard();
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [assignData, reminderData, docData] = await Promise.all([
-          tenantAssignmentApi.myAssignment(),
-          tenantRentApi.myReminders().catch(() => []),
-          tenantDocumentApi.list().catch(() => []),
-        ]);
-        setAssignment(assignData.assignment);
-        setRoom(assignData.room);
-        setReminders(reminderData);
-        setDocuments(docData);
-      } catch { /* ignore */ }
-      setLoading(false);
-    };
-    load();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-3">
@@ -43,10 +19,10 @@ export default function TenantDashboard() {
     );
   }
 
-  const pendingDocs = documents.filter(d => d.status === "pending").length;
-  const approvedDocs = documents.filter(d => d.status === "approved").length;
-  const overdueReminders = reminders.filter(r => r.isOverdue);
-  const upcomingReminders = reminders.filter(r => !r.isOverdue);
+  const pendingDocs = documents.filter((d: any) => d.status === "pending").length;
+  const approvedDocs = documents.filter((d: any) => d.status === "approved").length;
+  const overdueReminders = reminders.filter((r: any) => r.isOverdue);
+  const upcomingReminders = reminders.filter((r: any) => !r.isOverdue);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -69,7 +45,7 @@ export default function TenantDashboard() {
             <p className="text-sm font-medium text-red-300">Overdue Rent Payment</p>
             <p className="text-xs text-red-400/60 mt-0.5">
               You have {overdueReminders.length} overdue payment{overdueReminders.length > 1 ? "s" : ""}.
-              Total: £{overdueReminders.reduce((s, r) => s + r.amount, 0).toLocaleString()}.
+              Total: £{overdueReminders.reduce((s: number, r: any) => s + r.amount, 0).toLocaleString()}.
             </p>
           </div>
         </div>
