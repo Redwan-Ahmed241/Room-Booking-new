@@ -11,5 +11,13 @@ export default defineConfig({
   },
   build: {
     sourcemap: false, // Disable sourcemaps to eliminate warnings
+    rollupOptions: {
+      onwarn(warning, defaultHandler) {
+        if (warning.code === 'SOURCEMAP_ERROR' || warning.message.includes("sourcemap")) {
+          return
+        }
+        defaultHandler(warning)
+      },
+    },
   },
 })

@@ -165,10 +165,10 @@ const Navbar: React.FC = () => {
       }}
     >
       <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-14">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/admin" className="flex items-center">
-            <Logo size="lg" height="5rem" />
+            <Logo size="md" height="2.75rem" />
           </Link>
 
           {/* Center Nav */}
