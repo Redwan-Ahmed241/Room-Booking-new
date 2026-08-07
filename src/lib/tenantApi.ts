@@ -4,7 +4,7 @@ import { supabase } from "../services/supabaseClient";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://room-booking-pjo6.onrender.com/api";
+  "https://neo-scape-properties-ltd-nine.vercel.app/api";
 
 async function getSupabaseToken(): Promise<string | null> {
   const {

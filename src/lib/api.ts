@@ -4,7 +4,7 @@
 import { supabase } from "../services/supabaseClient";
 import type { PropertyDocument, RentSchedule, RentPayment, RentReminder, BookingInterest } from "./documentTypes";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://room-booking-pjo6.onrender.com/api"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://neo-scape-properties-ltd-nine.vercel.app/api"
 
 // Room type
 interface Room {

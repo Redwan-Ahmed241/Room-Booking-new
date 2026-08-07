@@ -33,7 +33,7 @@ export default function ChatAndAgreementPage() {
       setError("");
       try {
         const headers = await getHeaders();
-        const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://room-booking-pjo6.onrender.com/api";
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://neo-scape-properties-ltd-nine.vercel.app/api";
         const res = await fetch(`${API_BASE}/bookings/channels/`, {
           headers,
         });

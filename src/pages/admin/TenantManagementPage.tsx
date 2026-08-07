@@ -115,7 +115,7 @@ export default function TenantManagementPage() {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       
-      const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://room-booking-pjo6.onrender.com/api";
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://neo-scape-properties-ltd-nine.vercel.app/api";
       const res = await fetch(`${API_BASE}/bookings/channels/`, {
         method: "POST",
         headers: {

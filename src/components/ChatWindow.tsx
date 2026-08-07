@@ -47,7 +47,7 @@ export default function ChatWindow({ channelId }: ChatWindowProps) {
     if (isInitial) setLoading(true);
     try {
       const headers = await getHeaders();
-      const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://room-booking-pjo6.onrender.com/api";
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://neo-scape-properties-ltd-nine.vercel.app/api";
       const res = await fetch(`${API_BASE}/bookings/channels/${channelId}/messages/`, {
         headers,
       });
@@ -88,7 +88,7 @@ export default function ChatWindow({ channelId }: ChatWindowProps) {
 
     try {
       const headers = await getHeaders();
-      const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://room-booking-pjo6.onrender.com/api";
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://neo-scape-properties-ltd-nine.vercel.app/api";
       const response = await fetch(`${API_BASE}/bookings/channels/${channelId}/messages/`, {
         method: "POST",
         headers,
